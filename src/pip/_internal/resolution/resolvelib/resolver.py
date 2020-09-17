@@ -6,6 +6,9 @@ from pip._vendor.packaging.utils import canonicalize_name
 from pip._vendor.resolvelib import BaseReporter, ResolutionImpossible
 from pip._vendor.resolvelib import Resolver as RLResolver
 
+# from pip._vender.resolvelib.mix import VersionSolver
+# from pip._internal.packages import Package 
+
 from pip._internal.exceptions import InstallationError
 from pip._internal.req.req_set import RequirementSet
 from pip._internal.resolution.base import BaseResolver
@@ -75,6 +78,8 @@ class Resolver(BaseResolver):
             self.factory.make_requirement_from_install_req(r)
             for r in root_reqs
         ]
+
+        #TODO: implement new solver
 
         try:
             self._result = resolver.resolve(requirements)
