@@ -78,8 +78,8 @@ class Resolver(BaseResolver):
             self.factory.make_requirement_from_install_req(r)
             for r in root_reqs
         ]
-
-        #TODO: implement new solver
+        # TODO: use requirement into package_source 
+        # TODO: use package_source in new solver and get answer
 
         try:
             self._result = resolver.resolve(requirements)
