@@ -95,6 +95,7 @@ class Requirement(object):
     def __init__(self, requirement_string):
         # type: (str) -> None
         try:
+            # requirement_string is just a string like 'resolvelib==0.1.0'
             req = REQUIREMENT.parseString(requirement_string)
         except ParseException as e:
             raise InvalidRequirement(
