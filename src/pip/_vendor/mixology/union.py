@@ -18,6 +18,7 @@ class Union(object):
         return self._ranges
 
     @classmethod
+    # *ranges is list
     def of(cls, *ranges):
         flattened = []
         #pdb.set_trace()
