@@ -10,7 +10,7 @@ from .incompatibility_cause import IncompatibilityCause
 from .incompatibility_cause import NoVersionsCause
 from .incompatibility_cause import PackageNotFoundCause
 from .incompatibility_cause import RootCause
-from .package import Package
+from pip._internal.packages.package import Package
 from .term import Term
 
 

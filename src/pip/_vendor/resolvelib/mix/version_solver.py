@@ -14,7 +14,7 @@ from .incompatibility import Incompatibility
 from .incompatibility_cause import ConflictCause
 from .incompatibility_cause import NoVersionsCause
 from .incompatibility_cause import RootCause
-from .package_source import PackageSource
+from pip._internal.packages.package_source import PackageSource
 from .partial_solution import PartialSolution
 from .range import Range
 from .result import SolverResult

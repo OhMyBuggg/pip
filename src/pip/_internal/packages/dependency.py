@@ -1,3 +1,5 @@
+from pip._vendor.resolvelib.mix.constraint import Constraint
+
 class Dependency(object):
     def __init__(self, name, constraints):
         self._name = name

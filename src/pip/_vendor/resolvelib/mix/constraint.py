@@ -1,7 +1,7 @@
 from typing import Hashable
 from typing import Union as _Union
 
-from .package import Package
+from pip._internal.packages.package import Package
 from .range import Range
 from .set_relation import SetRelation
 from .union import Union

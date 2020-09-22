@@ -7,7 +7,7 @@ from ._compat import OrderedDict
 from .assignment import Assignment
 from .constraint import Constraint
 from .incompatibility import Incompatibility
-from .package import Package
+from pip._internal.packages.package import Package
 from .set_relation import SetRelation
 from .term import Term
 

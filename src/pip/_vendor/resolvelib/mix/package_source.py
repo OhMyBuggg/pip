@@ -6,7 +6,7 @@ from typing import Union as _Union
 from .constraint import Constraint
 from .incompatibility import Incompatibility
 from .incompatibility_cause import DependencyCause
-from .package import Package
+from pip._internal.packages.package import Package
 from .range import Range
 from .term import Term
 from .union import Union

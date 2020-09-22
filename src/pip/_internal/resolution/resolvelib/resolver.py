@@ -7,7 +7,6 @@ from pip._vendor.resolvelib import BaseReporter, ResolutionImpossible
 from pip._vendor.resolvelib import Resolver as RLResolver
 
 # from pip._vender.resolvelib.mix import VersionSolver
-# from pip._internal.packages import Package 
 
 from pip._internal.exceptions import InstallationError
 from pip._internal.req.req_set import RequirementSet

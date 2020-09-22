@@ -3,7 +3,7 @@ from typing import Hashable
 from typing import Optional
 
 from .constraint import Constraint
-from .package import Package
+from pip._internal.packages.package import Package
 from .range import EmptyRange
 from .set_relation import SetRelation
 
