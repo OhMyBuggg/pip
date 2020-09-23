@@ -88,4 +88,7 @@ class PackageSource(BasePackageSource):
         # call add
         self._candidate = self._provider.find_matches(requirements)
         
+
+        # joe think: modify requiremeny so use provider, but need to change constraint into specifier
+        # I think: change requirement into _package, but need to think how to do it.
         
