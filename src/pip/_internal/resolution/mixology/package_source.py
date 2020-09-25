@@ -117,16 +117,17 @@ class PackageSource(BasePackageSource):
             return [Range()]
         
         elif op_and_version[1] == '==' and len(op_and_version) != 4:
-            version, count = self.padding(op_and_version[2])
-            min = Version.parse(version)
-            max = Version.parse(version)
+            
+            min = Version.parse(op_and_version[2])
+            max = Version.parse(op_and_version[2])
             return [ Range(min, max, True, True) ]
 
         elif op_and_version[1] == '~=' or ( op_and_version[1] == '==' and len(op_and_version) == 4):
-            version, count = self.padding(op_and_version[2])
             
-            min = Version.parse(version)
-            max = Version.parse(version)
+            count = len(op_and_version[2].split('.'))
+            
+            min = Version.parse(op_and_version[2])
+            max = Version.parse(op_and_version[2])
 
             if count == 1:
                 max = max._increment_minor()
@@ -137,28 +138,29 @@ class PackageSource(BasePackageSource):
         
         elif op_and_version[1] == '!=':
             # separate into two range
-            version, count = self.padding(op_and_version[2])
+            
+            version = Verison.parse(op_and_version[2])
             return [Range(min=version, max=None, include_min=False, include_max=False),
             Range(min=None, max=version, include_min=False, include_max=False)]
             
         elif op_and_version[1] == '>=':
-            version, count = self.padding(op_and_version[2])
-            version = Verison.parse(version)
+            
+            version = Verison.parse(op_and_version[2])
             return [Range(min=version, max=None, include_min=True, include_max=False)]
         
         elif op_and_version[1] == '>':
-            version, count = self.padding(op_and_version[2])
-            version = Verison.parse(version)
+            
+            version = Verison.parse(op_and_version[2])
             return [Range(min=version, max=None, include_min=False, include_max=False)]
         
         elif op_and_version[1] == '<=':
-            version, count = self.padding(op_and_version[2])
-            version = Verison.parse(version)
+            
+            version = Verison.parse(op_and_version[2])
             return [Range(min=None, max=version, include_min=False, include_max=True)]
         
         elif op_and_version[1] == '<':
-            version, count = self.padding(op_and_version[2])
-            version = Verison.parse(version)
+            
+            version = Verison.parse(op_and_version[2])
             return [Range(min=None, max=version, include_min=False, include_max=False)]
         
         else :
@@ -177,5 +179,5 @@ class PackageSource(BasePackageSource):
         elif count == 1:
             version = version + '.0.0'
         else:
-            print("eror in padding")        
+            print("error in padding")        
         return version, count
