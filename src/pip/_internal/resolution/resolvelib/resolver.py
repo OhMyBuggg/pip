@@ -1,11 +1,14 @@
 import functools
 import logging
+import pdb
 
 from pip._vendor import six
 from pip._vendor.packaging.utils import canonicalize_name
 from pip._vendor.resolvelib import BaseReporter, ResolutionImpossible
 from pip._vendor.resolvelib import Resolver as RLResolver
+from pip._vendor.mixology.version_solver import VersionSolver 
 
+from pip._internal.resolution.mixology.package_source import PackageSource
 from pip._internal.exceptions import InstallationError
 from pip._internal.req.req_set import RequirementSet
 from pip._internal.resolution.base import BaseResolver
@@ -69,15 +72,22 @@ class Resolver(BaseResolver):
             ignore_dependencies=self.ignore_dependencies,
         )
         reporter = BaseReporter()
-        resolver = RLResolver(provider, reporter)
+        #resolver = RLResolver(provider, reporter)
 
         requirements = [
             self.factory.make_requirement_from_install_req(r)
             for r in root_reqs
         ]
+        
+        package_source = PackageSource(provider, requirements)
+        resolver = VersionSolver(package_source)
+
+        # try:
+        #     self._result = resolver.resolve(requirements)
 
         try:
-            self._result = resolver.resolve(requirements)
+            self._result = resolver.solve()
+            pdb.set_trace()
 
         except ResolutionImpossible as e:
             error = self.factory.get_installation_error(e)
