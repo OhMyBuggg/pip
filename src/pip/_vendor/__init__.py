@@ -112,3 +112,5 @@ if DEBUNDLED:
     vendored("toml.encoder")
     vendored("toml.decoder")
     vendored("urllib3")
+    vendored("mixology")
+    vendored("poetry_semver")
