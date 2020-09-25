@@ -115,9 +115,14 @@ class PackageSource(BasePackageSource):
         if op_and_version[1] == '===':
             print()
         elif op_and_version[1] == '==':
-            print()
+            return Range(
+                Version.parse(op_and_version[2]), 
+                Version.parse(op_and_version[2]), True, True)
+
         elif op_and_version[1] == '~=':
-            print()
+            return Range(
+                Version.parse(op_and_version[2]), 
+                Version.parse(op_and_version[2]), True, True)
         elif op_and_version[1] == '!=':
             print()
         elif op_and_version[1] == '>=':
