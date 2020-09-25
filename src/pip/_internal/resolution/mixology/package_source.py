@@ -1,7 +1,7 @@
 import re
 import sys
 if __name__ == "__main__":
-    sys.path[0] = ('/mnt/c/Users/wchiung.cs06/Desktop/graduate_project/pip-develop/src/')
+    sys.path[0] = ('/home/wc/pip-develop/src/')
 from pip._internal.resolution.resolvelib.provider import PipProvider
 from pip._internal.resolution.resolvelib.requirements import (
     ExplicitRequirement,
@@ -97,8 +97,8 @@ class PackageSource(BasePackageSource):
             ranges = []
             for spec in specs:
                 s = spec.__str__()
-                temp_range = self.parse_specifier(s)
-                ranges.append(temp_range)
+                temp_ranges = self.parse_specifier(s)
+                ranges = ranges + temp_ranges
             
             constraints.append(Constraint(Package(requirement.name), Union(*ranges)))
         
@@ -108,32 +108,74 @@ class PackageSource(BasePackageSource):
             pass
 
         return constraints
-    # Version.parse will return a Version
+    # Version.parse will return list of Range
     def parse_specifier(self, spec):
         
-        op_and_version = re.split(r'(===|==|~=|!=|>=|>|<=|<)', spec) #list of str
+        op_and_version = re.split(r'(===|==|~=|!=|>=|>|<=|<|*)', spec) #list of str
         if op_and_version[1] == '===':
-            print()
-        elif op_and_version[1] == '==':
-            return Range(
-                Version.parse(op_and_version[2]), 
-                Version.parse(op_and_version[2]), True, True)
+            # I surrender. I think it can't be transformed to range
+            return [Range()]
+        
+        elif op_and_version[1] == '==' and len(op_and_version) != 4:
+            version, count = self.padding(op_and_version[2])
+            min = Version.parse(version)
+            max = Version.parse(version)
+            return [ Range(min, max, True, True) ]
 
-        elif op_and_version[1] == '~=':
-            return Range(
-                Version.parse(op_and_version[2]), 
-                Version.parse(op_and_version[2]), True, True)
+        elif op_and_version[1] == '~=' or ( op_and_version[1] == '==' and len(op_and_version) == 4):
+            version, count = self.padding(op_and_version[2])
+            
+            min = Version.parse(version)
+            max = Version.parse(version)
+
+            if count == 1:
+                max = max._increment_minor()
+            elif count == 2:
+                max = max._increment_patch()
+
+            return [ Range(min, max, True, False) ]
+        
         elif op_and_version[1] == '!=':
-            print()
+            # separate into two range
+            version, count = self.padding(op_and_version[2])
+            return [Range(min=version, max=None, include_min=False, include_max=False),
+            Range(min=None, max=version, include_min=False, include_max=False)]
+            
         elif op_and_version[1] == '>=':
-            print()
+            version, count = self.padding(op_and_version[2])
+            version = Verison.parse(version)
+            return [Range(min=version, max=None, include_min=True, include_max=False)]
+        
         elif op_and_version[1] == '>':
-            print()
+            version, count = self.padding(op_and_version[2])
+            version = Verison.parse(version)
+            return [Range(min=version, max=None, include_min=False, include_max=False)]
+        
         elif op_and_version[1] == '<=':
-            print()
+            version, count = self.padding(op_and_version[2])
+            version = Verison.parse(version)
+            return [Range(min=None, max=version, include_min=False, include_max=True)]
+        
         elif op_and_version[1] == '<':
-            print()
+            version, count = self.padding(op_and_version[2])
+            version = Verison.parse(version)
+            return [Range(min=None, max=version, include_min=False, include_max=False)]
+        
         else :
             print("error")
         
         return 0
+    # str -> str
+    def padding(self, version):
+        count = version.split('.')
+        count = len(count)
+
+        if count == 3:
+            version = version
+        elif count == 2:
+            version = version + '.0'
+        elif count == 1:
+            version = version + '.0.0'
+        else:
+            print("eror in padding")        
+        return version, count
