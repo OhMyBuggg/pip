@@ -36,14 +36,14 @@ class PackageSource(BasePackageSource):
 
     def _versions_for(self, package, constraint=None):
         if package not in self.package:
-            return []
+            return [] #
 
         versions = []
         for version in self.package[package].keys():
             if not constraint or constraint.allows_any(
                 Range(version, version, True, True)
             ):
-                versions.append(version)
+                versions.append(version) #
 
         return sorted(versions, reverse=True)
 
@@ -100,7 +100,7 @@ class PackageSource(BasePackageSource):
                 temp_ranges = self.parse_specifier(s)
                 ranges = ranges + temp_ranges
             
-            constraints.append(Constraint(Package(requirement.name), Union(*ranges)))
+            constraints.append(Constraint(Packa8ge(requirement.name), Union(*ranges)))
         
         elif isinstance(requirement, RequiresPythonRequirement):
             pass
