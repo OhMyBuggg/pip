@@ -10,6 +10,10 @@ from pip._internal.exceptions import InstallationError
 from pip._internal.req.req_set import RequirementSet
 from pip._internal.resolution.base import BaseResolver
 from pip._internal.resolution.resolvelib.provider import PipProvider
+
+from pip._internal.resolution.mixology.package_source import PackageSource
+from pip._vendor.mixology.version_solver import VersionSolver
+
 from pip._internal.utils.typing import MYPY_CHECK_RUNNING
 
 from .factory import Factory
@@ -68,16 +72,20 @@ class Resolver(BaseResolver):
             factory=self.factory,
             ignore_dependencies=self.ignore_dependencies,
         )
-        reporter = BaseReporter()
-        resolver = RLResolver(provider, reporter)
+        # reporter = BaseReporter()
+        # resolver = RLResolver(provider, reporter)
 
         requirements = [
             self.factory.make_requirement_from_install_req(r)
             for r in root_reqs
         ]
 
+        pkg_src = PackageSource(provider, requirements)
+        resolver = VersionSolver(pkg_src)
+
         try:
-            self._result = resolver.resolve(requirements)
+            # self._result = resolver.resolve(requirements)
+            self._result = resolver.solve()
 
         except ResolutionImpossible as e:
             error = self.factory.get_installation_error(e)
