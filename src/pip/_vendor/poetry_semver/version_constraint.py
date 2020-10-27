@@ -1,4 +1,4 @@
-import semver
+import pip._vendor.poetry_semver
 
 
 class VersionConstraint:

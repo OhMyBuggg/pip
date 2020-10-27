@@ -1,6 +1,6 @@
 from typing import List
 
-import semver
+import pip._vendor.poetry_semver
 
 from .empty_constraint import EmptyConstraint
 from .version_constraint import VersionConstraint
