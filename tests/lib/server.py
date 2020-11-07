@@ -15,7 +15,16 @@ from pip._internal.utils.typing import MYPY_CHECK_RUNNING
 if MYPY_CHECK_RUNNING:
     from types import TracebackType
     from typing import (
-        Any, Callable, Dict, Iterable, List, Optional, Text, Tuple, Type, Union
+        Any,
+        Callable,
+        Dict,
+        Iterable,
+        List,
+        Optional,
+        Text,
+        Tuple,
+        Type,
+        Union,
     )
 
     from werkzeug.serving import BaseWSGIServer
@@ -42,9 +51,14 @@ else:
     def blocked_signals():
         """Block all signals for e.g. starting a worker thread.
         """
-        old_mask = signal.pthread_sigmask(
-            signal.SIG_SETMASK, range(1, signal.NSIG)
-        )
+        # valid_signals() was added in Python 3.8 (and not using it results
+        # in a warning on pthread_sigmask() call)
+        try:
+            mask = signal.valid_signals()
+        except AttributeError:
+            mask = set(range(1, signal.NSIG))
+
+        old_mask = signal.pthread_sigmask(signal.SIG_SETMASK, mask)
         try:
             yield
         finally:
@@ -83,7 +97,10 @@ def _mock_wsgi_adapter(mock):
     """
     def adapter(environ, start_response):
         # type: (Environ, StartResponse) -> Body
-        responder = mock(environ, start_response)
+        try:
+            responder = mock(environ, start_response)
+        except StopIteration:
+            raise RuntimeError('Ran out of mocked responses.')
         return responder(environ, start_response)
 
     return adapter
@@ -203,6 +220,22 @@ def file_response(path):
             "200 OK", [
                 ("Content-Type", "application/octet-stream"),
                 ("Content-Length", str(size)),
+            ],
+        )
+
+        with open(path, 'rb') as f:
+            return [f.read()]
+
+    return responder
+
+
+def authorization_response(path):
+    def responder(environ, start_response):
+        # type: (Environ, StartResponse) -> Body
+
+        start_response(
+            "401 Unauthorized", [
+                ("WWW-Authenticate", "Basic"),
             ],
         )
 

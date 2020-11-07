@@ -22,8 +22,7 @@ def get_version(rel_path):
             # __version__ = "0.9"
             delim = '"' if '"' in line else "'"
             return line.split(delim)[1]
-    else:
-        raise RuntimeError("Unable to find version string.")
+    raise RuntimeError("Unable to find version string.")
 
 
 long_description = read('README.rst')
@@ -48,6 +47,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
@@ -56,10 +56,11 @@ setup(
     project_urls={
         "Documentation": "https://pip.pypa.io",
         "Source": "https://github.com/pypa/pip",
+        "Changelog": "https://pip.pypa.io/en/stable/news/",
     },
 
     author='The pip developers',
-    author_email='pypa-dev@groups.google.com',
+    author_email='distutils-sig@python.org',
 
     package_dir={"": "src"},
     packages=find_packages(
