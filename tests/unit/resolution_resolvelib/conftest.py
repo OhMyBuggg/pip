@@ -4,6 +4,7 @@ from pip._internal.cli.req_command import RequirementCommand
 from pip._internal.commands.install import InstallCommand
 from pip._internal.index.collector import LinkCollector
 from pip._internal.index.package_finder import PackageFinder
+
 # from pip._internal.models.index import PyPI
 from pip._internal.models.search_scope import SearchScope
 from pip._internal.models.selection_prefs import SelectionPreferences
@@ -52,6 +53,8 @@ def factory(finder, preparer):
         finder=finder,
         preparer=preparer,
         make_install_req=install_req_from_line,
+        wheel_cache=None,
+        use_user_site=False,
         force_reinstall=False,
         ignore_installed=False,
         ignore_requires_python=False,
@@ -63,5 +66,8 @@ def factory(finder, preparer):
 def provider(factory):
     yield PipProvider(
         factory=factory,
+        constraints={},
         ignore_dependencies=False,
+        upgrade_strategy="to-satisfy-only",
+        user_requested=set(),
     )

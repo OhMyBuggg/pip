@@ -1,7 +1,7 @@
 import pytest
 from pip._vendor.resolvelib import BaseReporter, Resolver
 
-from pip._internal.resolution.resolvelib.base import Candidate
+from pip._internal.resolution.resolvelib.base import Candidate, Constraint
 from pip._internal.utils.urls import path_to_url
 
 # NOTE: All tests are prefixed `test_rlr` (for "test resolvelib resolver").
@@ -49,23 +49,30 @@ def test_cases(data):
 
 def test_new_resolver_requirement_has_name(test_cases, factory):
     """All requirements should have a name"""
-    for spec, name, matches in test_cases:
+    for spec, name, _ in test_cases:
         req = factory.make_requirement_from_spec(spec, comes_from=None)
         assert req.name == name
 
 
 def test_new_resolver_correct_number_of_matches(test_cases, factory):
     """Requirements should return the correct number of candidates"""
-    for spec, name, matches in test_cases:
+    for spec, _, match_count in test_cases:
         req = factory.make_requirement_from_spec(spec, comes_from=None)
-        assert len(req.find_matches()) == matches
+        matches = factory.find_candidates(
+            [req], Constraint.empty(), prefers_installed=False,
+        )
+        assert sum(1 for _ in matches) == match_count
 
 
 def test_new_resolver_candidates_match_requirement(test_cases, factory):
-    """Candidates returned from find_matches should satisfy the requirement"""
-    for spec, name, matches in test_cases:
+    """Candidates returned from find_candidates should satisfy the requirement
+    """
+    for spec, _, _ in test_cases:
         req = factory.make_requirement_from_spec(spec, comes_from=None)
-        for c in req.find_matches():
+        candidates = factory.find_candidates(
+            [req], Constraint.empty(), prefers_installed=False,
+        )
+        for c in candidates:
             assert isinstance(c, Candidate)
             assert req.is_satisfied_by(c)
 

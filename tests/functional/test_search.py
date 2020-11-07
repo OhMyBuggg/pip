@@ -5,17 +5,7 @@ import pytest
 
 from pip._internal.cli.status_codes import NO_MATCHES_FOUND, SUCCESS
 from pip._internal.commands import create_command
-from pip._internal.commands.search import (
-    highest_version,
-    print_results,
-    transform_hits,
-)
-from tests.lib import pyversion
-
-if pyversion >= '3':
-    VERBOSE_FALSE = False
-else:
-    VERBOSE_FALSE = 0
+from pip._internal.commands.search import highest_version, print_results, transform_hits
 
 
 def test_version_compare():
@@ -168,7 +158,8 @@ def test_latest_prerelease_install_message(caplog, monkeypatch):
 
     dist = pretend.stub(version="1.0.0")
     get_dist = pretend.call_recorder(lambda x: dist)
-    monkeypatch.setattr("pip._vendor.pkg_resources.get_distribution", get_dist)
+    monkeypatch.setattr("pip._internal.commands.search.get_distribution",
+                        get_dist)
     with caplog.at_level(logging.INFO):
         print_results(hits)
 
