@@ -71,10 +71,15 @@ class PackageSource(BasePackageSource):
                 package = Package(requirement.name)
                 self.package[package] = {}
 
-            candidates = self.provider.find_match(requirement)
+            # import pdb
+            # pdb.set_trace()
+            candidates = self.provider.find_matches([requirement])
             
             for candidate in candidates:
-                version = Version.parse(candidate.version)
+                # print(type(candidate.version))
+                # print(dir(candidate.version))
+                # print(candidate.version.__str__)
+                version = Version.parse(candidate.version.__str__())
                 package = Package(requirement.name)
                 self.package[requirement.name][version] = candidate
 

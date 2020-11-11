@@ -1,7 +1,11 @@
 from typing import List
 from typing import Union as _Union
 
-import pip._vendor.mixology.range
+# import pip._vendor.mixology._compat
+# import pip._vendor.mixology.failure
+# print (666)
+from . import range as mixology
+
 
 
 class Union(object):
@@ -30,10 +34,10 @@ class Union(object):
             flattened.append(constraint)
 
         if not flattened:
-            return mixology.range.EmptyRange()
+            return mixology.EmptyRange()
 
         if any([constraint.is_any() for constraint in flattened]):
-            return mixology.range.Range()
+            return mixology.Range()
 
         flattened.sort()
 
@@ -59,7 +63,7 @@ class Union(object):
     def is_any(self):
         return False
 
-    def allows_all(self, other):  # type: (_Union[mixology.range.Range, Union]) -> bool
+    def allows_all(self, other):  # type: (_Union[mixology.Range, Union]) -> bool
         our_ranges = iter(self._ranges)
         their_ranges = iter(self._ranges_for(other))
 
@@ -74,7 +78,7 @@ class Union(object):
 
         return their_current_range is None
 
-    def allows_any(self, other):  # type: (_Union[mixology.range.Range, Union]) -> bool
+    def allows_any(self, other):  # type: (_Union[mixology.Range, Union]) -> bool
         our_ranges = iter(self._ranges)
         their_ranges = iter(self._ranges_for(other))
 
@@ -94,7 +98,7 @@ class Union(object):
 
     def intersect(
         self, other
-    ):  # type: (_Union[mixology.range.Range, Union]) -> _Union[mixology.range.Range, Union]
+    ):  # type: (_Union[mixology.Range, Union]) -> _Union[mixology.Range, Union]
         our_ranges = iter(self._ranges)
         their_ranges = iter(self._ranges_for(other))
         new_ranges = []
@@ -117,12 +121,12 @@ class Union(object):
 
     def union(
         self, other
-    ):  # type: (_Union[mixology.range.Range, Union]) -> _Union[mixology.range.Range, Union]
+    ):  # type: (_Union[mixology.Range, Union]) -> _Union[mixology.Range, Union]
         return Union.of(self, other)
 
     def difference(
         self, other
-    ):  # type: (_Union[mixology.range.Range, Union]) -> _Union[mixology.range.Range, Union]
+    ):  # type: (_Union[mixology.Range, Union]) -> _Union[mixology.Range, Union]
         our_ranges = iter(self._ranges)
         their_ranges = iter(self._ranges_for(other))
         new_ranges = []
@@ -131,7 +135,8 @@ class Union(object):
             "current": next(our_ranges, None),
             "their_range": next(their_ranges, None),
         }
-
+        import pdb
+        pdb.set_trace()
         def their_next_range():
             state["their_range"] = next(their_ranges, None)
             if state["their_range"]:
@@ -195,7 +200,7 @@ class Union(object):
                         break
 
         if not new_ranges:
-            return mixology.range.EmptyRange()
+            return mixology.EmptyRange()
 
         if len(new_ranges) == 1:
             return new_ranges[0]
@@ -203,16 +208,16 @@ class Union(object):
         return Union.of(*new_ranges)
 
     def excludes_single_version(self):  # type: () -> bool
-        difference = self.difference(mixology.range.Range())
+        difference = self.difference(mixology.Range())
 
         return (
-            isinstance(difference, mixology.range.Range)
+            isinstance(difference, mixology.Range)
             and difference.is_single_version()
         )
 
     def _ranges_for(
         self, constraint
-    ):  # type: (_Union[Union, mixology.range.Range]) -> List[mixology.range.Range]
+    ):  # type: (_Union[Union, mixology.Range]) -> List[mixology.Range]
         if constraint.is_empty():
             return []
 
@@ -229,7 +234,7 @@ class Union(object):
 
     def __str__(self):
         if self.excludes_single_version():
-            return "!={}".format(mixology.range.Range().difference(self))
+            return "!={}".format(mixology.Range().difference(self))
 
         return " || ".join([str(r) for r in self._ranges])
 

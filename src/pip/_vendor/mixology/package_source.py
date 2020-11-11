@@ -103,7 +103,8 @@ class PackageSource(object):
         """
         dependencies = self.dependencies_for(package, version)
         package_constraint = Constraint(package, Range(version, version, True, True))
-
+        # import pdb
+        # pdb.set_trace()
         incompatibilities = []
         for dependency in dependencies:
             constraint = self.convert_dependency(dependency)

@@ -1,4 +1,4 @@
-from pip._vendor.mixology.constraint import Constraint
+# from pip._vendor.mixology.constraint import Constraint
 
 class Dependency(object):
     def __init__(self, name, constraints):
