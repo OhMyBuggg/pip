@@ -54,16 +54,19 @@ class PackageSource(BasePackageSource):
         
         if package == self.root:
             requirements = self.root_requirements
+            # print("__root__")
         else:
+            # print("not root")
             candidate = self.package[package][version]
-            requirements = self.provider._get_dependencies(candidate)
+            requirements = self.provider.get_dependencies(candidate)
         
         # put candidate in requirement to self.package
         # in this way may take a lot of time in provider.find_match()
         # the better way is that chaeck self.package first if what requirement want
         # is already in self.package we would not call provider.find_match
         # if not call provider.find_match
-
+        # for i in requirements:
+        #     print("requirement", i)
         dependencies = [] # Constraint
         for requirement in requirements:
 
@@ -100,6 +103,7 @@ class PackageSource(BasePackageSource):
         if isinstance(requirement, ExplicitRequirement):
             # may occur problem because of unclean specifier
             #for_constraint = re.split(r'(===|==|~=|!=|>=|>|<=|<)', requirement.candidate.version)
+            print("ExplicitRequirement")
             return Constraint(
                 Package(requirement.name),
                 Range(
@@ -108,15 +112,32 @@ class PackageSource(BasePackageSource):
         
         elif isinstance(requirement, SpecifierRequirement):
             
+            print("SpecifierRequirement")
             specs = requirement._ireq.req.specifier
+            # print("specifier", specs)
+            # print("type", type(specs))
+            # if specs.contains("0.1.0"):
+            #     print("accept")
+            # print("length", len(specs))
             ranges = []
+            if len(specs) == 0:
+                # print("0")
+                ranges = Range()
+                ranges = [ranges]
+                # print("length", len(ranges))
             for spec in specs:
+                # print("specifier", spec.__str__())
                 s = spec.__str__()
                 temp_ranges = self.parse_specifier(s)
                 ranges = ranges + temp_ranges
             
             # if there is a range only, error may happen (this problem is from "union and range" )
-            constraint = (Constraint(Package(requirement.name), Union(*ranges)))
+            
+            if len(ranges) == 1:
+                # print("ranges == 1")
+                constraint = (Constraint(Package(requirement.name), ranges[0]))
+            else:
+                constraint = (Constraint(Package(requirement.name), Union(*ranges)))
         
         elif isinstance(requirement, RequiresPythonRequirement):
             pass
@@ -188,6 +209,8 @@ class PackageSource(BasePackageSource):
 
     # to build mapping in result 
     def search_candidate(self, package, version):
+        # if package == self.root:
+        #     return None
         candidate = self.package[package][version]
         return candidate
 

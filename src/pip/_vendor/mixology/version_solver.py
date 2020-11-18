@@ -71,7 +71,6 @@ class VersionSolver:
         while not self.is_solved():
             if not self._run() or i > 10:
                 break
-
             i += 1
 
         logger.info("Version solving took {:.3f} seconds.\n")
@@ -85,7 +84,7 @@ class VersionSolver:
         graph = self._build_graph(mapping)
 
         return SolverResult(
-            self._solution.decisions, self._solution.attempted_solutions, mapping
+            self._solution.decisions, self._solution.attempted_solutions, mapping, graph
         )
 
     def _run(self):  # type: () -> bool
@@ -316,7 +315,7 @@ class VersionSolver:
                 )
             )
             logger.info(
-                '{} which is caused by "{}"'.format(bang, most_recent_satisfier.cause)
+              '{} which is caused by "{}"'.format(bang, most_recent_satisfier.cause)
             )
             logger.info("{} thus: {}".format(bang, incompatibility))
 
@@ -363,6 +362,7 @@ class VersionSolver:
 
         version = versions[0]
         conflict = False
+        # print("term.package", term.package, "version", version)
         for incompatibility in self._source.incompatibilities_for(
             term.package, version
         ):
@@ -387,6 +387,11 @@ class VersionSolver:
         return term.package
 
     def _add_incompatibility(self, incompatibility):  # type: (Incompatibility) -> None
+        # print("incompatibility")
+        # print(type(incompatibility))
+        # print(incompatibility.terms)
+
+        # print(incompatibility)
         logger.info("fact: {}".format(incompatibility))
 
         for term in incompatibility.terms:
@@ -402,23 +407,32 @@ class VersionSolver:
         
         mapping = {} #str : candidate
         for package in self._solution.decisions:
+            # print(type(package))
+            # 如果不把_root_拿掉下面的search_candidate()會出現error
+            # 因為_root_本來就不是真的存在的package
+            if package._name == "_root_":
+                continue
             version = self._solution.decisions[package]
             candidate = self._source.search_candidate(package, version)
             mapping[package._name] = candidate
 
         return mapping
 
+    # 因為我在 _build_mapping() 把root拿掉了所以現在會出錯
+    # 它找不到root在哪裡
     def _build_graph(self, mapping):
         graph = DirectedGraph()
-        for package, candidate in mapping.items():
+
+        for package in mapping:
+            candidate = mapping[package]
+
+            if package not in graph:
+                graph.add(package)
             
-            if package._name not in graph:
-                graph.add(package._name)
-            
-            for requirement in self._source.provider._get_dependencies(candidate):
+            for requirement in self._source.provider.get_dependencies(candidate):
                 if requirement.name not in graph:
                     graph.add(requirement.name)
                 
-                graph.connect(package._name, requirement.name)
+                graph.connect(package, requirement.name)
         
         return graph
