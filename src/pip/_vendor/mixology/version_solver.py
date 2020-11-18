@@ -410,9 +410,10 @@ class VersionSolver:
             # print(type(package))
             # 如果不把_root_拿掉下面的search_candidate()會出現error
             # 因為_root_本來就不是真的存在的package
-            if package._name == "_root_":
-                continue
+            # if package._name == "_root_":
+            #     continue
             version = self._solution.decisions[package]
+            # if _root_ then None
             candidate = self._source.search_candidate(package, version)
             mapping[package.name] = candidate
 
@@ -426,12 +427,15 @@ class VersionSolver:
             candidate = mapping[package]
 
             if package not in graph:
+                if package == "_root_":
+                    package = None
                 graph.add(package)
             
-            for requirement in self._source.provider.get_dependencies(candidate):
+            for requirement in self._source.get_dependencies(candidate):
                 if requirement.name not in graph:
                     graph.add(requirement.name)
                 
                 graph.connect(package, requirement.name)
         
+        mapping.pop("_root_")
         return graph

@@ -209,10 +209,16 @@ class PackageSource(BasePackageSource):
 
     # to build mapping in result 
     def search_candidate(self, package, version):
-        # if package == self.root:
-        #     return None
+        if package == self.root:
+            return None
         candidate = self.package[package][version]
         return candidate
+
+    def get_dependencies(self, candidate):
+        if candidate == None:
+            return self.root_requirements
+        else:
+            return self.provider.get_dependencies(candidate)
 
     # str -> str
     def padding(self, version):
