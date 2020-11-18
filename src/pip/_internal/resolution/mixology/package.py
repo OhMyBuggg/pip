@@ -6,6 +6,10 @@ class Package(object):
     def root(cls):  # type: () -> Package
         return Package("_root_")
 
+    @property
+    def name(self):  # type: () -> str
+        return self._name
+
     def __str__(self):
         return self._name 
 

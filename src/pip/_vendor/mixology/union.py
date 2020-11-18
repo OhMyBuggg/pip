@@ -135,8 +135,8 @@ class Union(object):
             "current": next(our_ranges, None),
             "their_range": next(their_ranges, None),
         }
-        import pdb
-        pdb.set_trace()
+        # import pdb
+        # pdb.set_trace()
         def their_next_range():
             state["their_range"] = next(their_ranges, None)
             if state["their_range"]:
