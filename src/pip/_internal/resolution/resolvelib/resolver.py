@@ -104,6 +104,7 @@ class Resolver(BaseResolver):
                 if r is not None:
                     requirements.append(r)
 
+        # import pdb; pdb.set_trace()
         provider = PipProvider(
             factory=self.factory,
             constraints=constraints,

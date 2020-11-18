@@ -404,21 +404,21 @@ class VersionSolver:
         for package in self._solution.decisions:
             version = self._solution.decisions[package]
             candidate = self._source.search_candidate(package, version)
-            mapping[package.name] = candidate
+            mapping[package._name] = candidate
 
         return mapping
 
     def _build_graph(self, mapping):
         graph = DirectedGraph()
-        for package, candidate in mapping:
+        for package, candidate in mapping.items():
             
-            if package.name not in graph:
-                graph.add(package.name)
+            if package._name not in graph:
+                graph.add(package._name)
             
             for requirement in self._source.provider._get_dependencies(candidate):
                 if requirement.name not in graph:
                     graph.add(requirement.name)
                 
-                graph.connect(package.name, requirement.name)
+                graph.connect(package._name, requirement.name)
         
         return graph
