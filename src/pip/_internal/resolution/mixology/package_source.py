@@ -130,6 +130,7 @@ class PackageSource(BasePackageSource):
             for spec in specs:
                 # print("specifier", spec.__str__())
                 s = spec.__str__()
+                print(s)
                 temp_ranges = self.parse_specifier(s)
                 ranges = ranges + temp_ranges
             
@@ -142,7 +143,7 @@ class PackageSource(BasePackageSource):
                 constraint = (Constraint(Package(requirement.name), Union(*ranges)))
         
         elif isinstance(requirement, RequiresPythonRequirement):
-            print(RequiresPythonRequirement)
+            print("RequiresPythonRequirement")
 
             specs = requirement.specifier
 
@@ -180,7 +181,8 @@ class PackageSource(BasePackageSource):
             return [Range()]
         
         elif op_and_version[1] == '==' and len(op_and_version) != 4:
-            
+            # print("in == operator")
+            # print(op_and_version[2])
             min = Version.parse(op_and_version[2])
             max = Version.parse(op_and_version[2])
             return [ Range(min, max, True, True) ]
