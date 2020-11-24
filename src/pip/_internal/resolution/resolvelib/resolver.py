@@ -103,8 +103,7 @@ class Resolver(BaseResolver):
                 )
                 if r is not None:
                     requirements.append(r)
-
-        # import pdb; pdb.set_trace()
+        
         provider = PipProvider(
             factory=self.factory,
             constraints=constraints,
@@ -130,6 +129,9 @@ class Resolver(BaseResolver):
         except ResolutionImpossible as e:
             error = self.factory.get_installation_error(e)
             six.raise_from(error, e)
+
+        print("for fucking test I need to make some error")
+        #print(d)
 
         req_set = RequirementSet(check_supported_wheels=check_supported_wheels)
         for candidate in self._result.mapping.values():

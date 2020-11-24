@@ -59,7 +59,7 @@ class VersionSolver:
         or raises an error if no such set is available.
         """
         start = time.time()
-
+        
         self._add_incompatibility(
             Incompatibility(
                 [Term(Constraint(self._source.root, Range()), False)], RootCause()

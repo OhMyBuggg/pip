@@ -104,11 +104,13 @@ class PackageSource(BasePackageSource):
             # may occur problem because of unclean specifier
             #for_constraint = re.split(r'(===|==|~=|!=|>=|>|<=|<)', requirement.candidate.version)
             print("ExplicitRequirement")
+            print(type(requirement.candidate.version))
+            print(requirement.candidate.version)
             return Constraint(
                 Package(requirement.name),
                 Range(
-                    Version.parse(requirement.candidate.version), 
-                    Version.parse(requirement.candidate.version), True, True))
+                    Version.parse(requirement.candidate.version.__str__()), 
+                    Version.parse(requirement.candidate.version.__str__()), True, True))
         
         elif isinstance(requirement, SpecifierRequirement):
             
@@ -140,7 +142,30 @@ class PackageSource(BasePackageSource):
                 constraint = (Constraint(Package(requirement.name), Union(*ranges)))
         
         elif isinstance(requirement, RequiresPythonRequirement):
-            pass
+            print(RequiresPythonRequirement)
+
+            specs = requirement.specifier
+
+            ranges = []
+            if len(specs) == 0:
+                # print("0")
+                ranges = Range()
+                ranges = [ranges]
+                # print("length", len(ranges))
+            for spec in specs:
+                # print("specifier", spec.__str__())
+                s = spec.__str__()
+                temp_ranges = self.parse_specifier(s)
+                ranges = ranges + temp_ranges
+            
+            # if there is a range only, error may happen (this problem is from "union and range" )
+            
+            if len(ranges) == 1:
+                # print("ranges == 1")
+                constraint = (Constraint(Package(requirement.name), ranges[0]))
+            else:
+                constraint = (Constraint(Package(requirement.name), Union(*ranges)))
+            
         else :
             print("some error happen")
 

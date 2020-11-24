@@ -107,6 +107,7 @@ def test_new_resolver_picks_installed_version(script):
         "simple",
         "0.2.0",
     )
+    
     script.pip(
         "install",
         "--no-cache-dir", "--no-index",
