@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
 import time
+import collections
+import sys
+import warnings
 
 from typing import Dict
 from typing import Hashable
@@ -83,14 +86,16 @@ class VersionSolver:
         mapping = self._build_mapping()
         graph = self._build_graph(mapping)
 
-        # print("content", graph._vertices)
-        # print("mapping", mapping)
-        # return SolverResult(
-        #     self._solution.decisions, self._solution.attempted_solutions, mapping, graph
-        # )
+        print()
+        print("content", graph._vertices)
+        print("mapping", mapping)
+        print()
         return SolverResult(
-            None, None, mapping, graph
+            self._solution.decisions, self._solution.attempted_solutions, mapping, graph
         )
+        # return SolverResult(
+        #     None, None, mapping, graph
+        # )
 
     def _run(self):  # type: () -> bool
         if self.is_solved():
@@ -413,7 +418,7 @@ class VersionSolver:
     def _build_mapping(self):
         logger.info("build mapping")
         logger.info(self._solution.decisions)
-        mapping = {} #str : candidate
+        mapping = collections.OrderedDict() #str : candidate
         for package, version in self._solution.decisions.items():
             # print(package)
             # print(version)
@@ -434,20 +439,19 @@ class VersionSolver:
     # 它找不到root在哪裡
     def _build_graph(self, mapping):
         graph = DirectedGraph()
-        print(mapping)
+        # print(mapping)
         for package, _ in self._solution.decisions.items():
             candidate = mapping[package.name]
             package = package.name
             #candidate = mapping[package]
-            print(1)
             #print(package)
             if package not in graph:
-                print(package)
+                # print(package)
                 if package == "_root_":
                     package = None
                 graph.add(package)
-            else:
-                print("already in", package)
+            # else:
+            #     print("already in", package)
             
             for requirement in self._source.get_dependencies(candidate):
                 if requirement.name not in graph:

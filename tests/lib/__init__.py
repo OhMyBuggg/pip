@@ -634,12 +634,15 @@ class PipTestEnvironment(TestFileEnvironment):
             allow_stderr_warning=allow_stderr_warning,
         )
 
+        print(result.stdout)
+
         return TestPipResult(result, verbose=self.verbose)
 
     def pip(self, *args, **kwargs):
         __tracebackhide__ = True
         if self.pip_expect_warning:
             kwargs['allow_stderr_warning'] = True
+        
         if kwargs.pop('use_module', True):
             exe = 'python'
             args = ('-m', 'pip') + args

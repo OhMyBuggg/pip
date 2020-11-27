@@ -104,8 +104,8 @@ class PackageSource(BasePackageSource):
             # may occur problem because of unclean specifier
             #for_constraint = re.split(r'(===|==|~=|!=|>=|>|<=|<)', requirement.candidate.version)
             print("ExplicitRequirement")
-            print(type(requirement.candidate.version))
-            print(requirement.candidate.version)
+            # print(type(requirement.candidate.version))
+            # print(requirement.candidate.version)
             return Constraint(
                 Package(requirement.name),
                 Range(
@@ -130,7 +130,7 @@ class PackageSource(BasePackageSource):
             for spec in specs:
                 # print("specifier", spec.__str__())
                 s = spec.__str__()
-                print(s)
+                # print(s)
                 temp_ranges = self.parse_specifier(s)
                 ranges = ranges + temp_ranges
             
