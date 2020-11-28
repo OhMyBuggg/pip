@@ -68,6 +68,7 @@ class PackageSource(BasePackageSource):
         # for i in requirements:
         #     print("requirement", i)
         dependencies = [] # Constraint
+        constraints = []
         for requirement in requirements:
 
             if requirement.name not in self.package:
@@ -77,12 +78,26 @@ class PackageSource(BasePackageSource):
             # import pdb
             # pdb.set_trace()
             candidates = self.provider.find_matches([requirement])
-            
+        
+            # constraint = self.make_constraints(requirement.name, candidates.version.__str__())
+            # if constraint != 0:
+            #     constraints.append(constraint)
+            #print("candidate")
+            i = 0
             for candidate in candidates:
+                
+                if i == 0:
+                    i+=1
+                    constraint = self.make_constraints(requirement.name, candidate.version.__str__())
+                    if constraint != 0:
+                        constraints.append(constraint)
+                
+                print(candidate)
                 # print(type(candidate.version))
                 # print(dir(candidate.version))
                 # print(candidate.version.__str__)
                 version = Version.parse(candidate.version.__str__())
+                print(version)
                 package = Package(requirement.name)
                 self.package[requirement.name][version] = candidate
 
@@ -91,7 +106,23 @@ class PackageSource(BasePackageSource):
             # requirements
             dependencies.append(self.convert_requirement(requirement))
 
-        return dependencies
+        return dependencies, constraints
+    
+    def make_constraints(self, name = None, version = None):
+        if name != None and version != None:
+            if not self.eligible_for_upgrade(name):
+                size = Version.parse(version)
+                ranges = Range(size, size, True, True)
+                constraint = (Constraint(Package(name), ranges))
+                return constraint
+        return 0
+    
+    def eligible_for_upgrade(self, name):
+        if self.provider._upgrade_strategy == "eager":
+            return True
+        elif self.provider._upgrade_strategy == "only-if-needed":
+            return (name in self.provider._user_requested)
+        return False
 
     def convert_dependency(self, dependency): 
         return dependency

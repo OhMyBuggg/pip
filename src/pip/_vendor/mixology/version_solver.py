@@ -102,6 +102,8 @@ class VersionSolver:
             return False
 
         next_package = self._choose_package_version()
+        # add the assignment if only-if-needed
+
         self._propagate(next_package)
 
         if self.is_solved():
@@ -374,9 +376,11 @@ class VersionSolver:
         version = versions[0]
         conflict = False
         # print("term.package", term.package, "version", version)
-        for incompatibility in self._source.incompatibilities_for(
-            term.package, version
-        ):
+        incompatibilities, constraints = self._source.incompatibilities_for(term.package, version)
+        for constraint in constraints:
+            self._solution.derive(constraint, True, None)
+        
+        for incompatibility in incompatibilities:
             self._add_incompatibility(incompatibility)
 
             # If an incompatibility is already satisfied, then selecting version
