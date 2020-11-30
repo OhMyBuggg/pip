@@ -101,7 +101,7 @@ class PackageSource(object):
         """
         Returns the incompatibilities of a given package and version
         """
-        dependencies = self.dependencies_for(package, version)
+        dependencies, constraints = self.dependencies_for(package, version)
         package_constraint = Constraint(package, Range(version, version, True, True))
         # import pdb
         # pdb.set_trace()
@@ -118,4 +118,4 @@ class PackageSource(object):
             )
             incompatibilities.append(incompatibility)
 
-        return incompatibilities
+        return incompatibilities, constraints

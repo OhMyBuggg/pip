@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
 import time
+import collections
+import sys
+import warnings
 
 from typing import Dict
 from typing import Hashable
@@ -83,15 +86,24 @@ class VersionSolver:
         mapping = self._build_mapping()
         graph = self._build_graph(mapping)
 
+        print()
+        print("content", graph._vertices)
+        print("mapping", mapping)
+        print()
         return SolverResult(
             self._solution.decisions, self._solution.attempted_solutions, mapping, graph
         )
+        # return SolverResult(
+        #     None, None, mapping, graph
+        # )
 
     def _run(self):  # type: () -> bool
         if self.is_solved():
             return False
 
         next_package = self._choose_package_version()
+        # add the assignment if only-if-needed
+
         self._propagate(next_package)
 
         if self.is_solved():
@@ -199,6 +211,7 @@ class VersionSolver:
 
         .. _conflict resolution: https://github.com/dart-lang/pub/tree/master/doc/solver.md#conflict-resolution
         """
+        logger.info("conflict: {}".format(incompatibility))
         logger.info("conflict: {}".format(incompatibility))
 
         new_incompatibility = False
@@ -363,9 +376,11 @@ class VersionSolver:
         version = versions[0]
         conflict = False
         # print("term.package", term.package, "version", version)
-        for incompatibility in self._source.incompatibilities_for(
-            term.package, version
-        ):
+        incompatibilities, constraints = self._source.incompatibilities_for(term.package, version)
+        for constraint in constraints:
+            self._solution.derive(constraint, True, None)
+        
+        for incompatibility in incompatibilities:
             self._add_incompatibility(incompatibility)
 
             # If an incompatibility is already satisfied, then selecting version
@@ -382,6 +397,7 @@ class VersionSolver:
 
         if not conflict:
             self._solution.decide(term.package, version)
+            logger.info("selecting {} ({})".format(term.package, str(version)))
             logger.info("selecting {} ({})".format(term.package, str(version)))
 
         return term.package
@@ -404,18 +420,22 @@ class VersionSolver:
             self._incompatibilities[term.package].append(incompatibility)
 
     def _build_mapping(self):
-        
-        mapping = {} #str : candidate
-        for package in self._solution.decisions:
-            # print(type(package))
+        logger.info("build mapping")
+        logger.info(self._solution.decisions)
+        mapping = collections.OrderedDict() #str : candidate
+        for package, version in self._solution.decisions.items():
+            # print(package)
+            # print(version)
+            # print(1)
             # 如果不把_root_拿掉下面的search_candidate()會出現error
             # 因為_root_本來就不是真的存在的package
             # if package._name == "_root_":
             #     continue
-            version = self._solution.decisions[package]
+            #version = self._solution.decisions[package]
             # if _root_ then None
             candidate = self._source.search_candidate(package, version)
-            mapping[package._name] = candidate
+            mapping[package.name] = candidate
+            
 
         return mapping
 
@@ -423,14 +443,19 @@ class VersionSolver:
     # 它找不到root在哪裡
     def _build_graph(self, mapping):
         graph = DirectedGraph()
-
-        for package in mapping:
-            candidate = mapping[package]
-
+        # print(mapping)
+        for package, _ in self._solution.decisions.items():
+            candidate = mapping[package.name]
+            package = package.name
+            #candidate = mapping[package]
+            #print(package)
             if package not in graph:
+                # print(package)
                 if package == "_root_":
                     package = None
                 graph.add(package)
+            # else:
+            #     print("already in", package)
             
             for requirement in self._source.get_dependencies(candidate):
                 if requirement.name not in graph:
@@ -439,4 +464,7 @@ class VersionSolver:
                 graph.connect(package, requirement.name)
         
         mapping.pop("_root_")
+        # print("length", len(graph))
+        # print("content", graph._vertices)
+        # print("mapping", mapping)
         return graph

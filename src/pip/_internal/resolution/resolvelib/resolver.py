@@ -82,7 +82,9 @@ class Resolver(BaseResolver):
         constraints = {}  # type: Dict[str, Constraint]
         user_requested = set()  # type: Set[str]
         requirements = []
+        print("root requirement")
         for req in root_reqs:
+            print(req.name)
             if req.constraint:
                 # Ensure we only accept valid constraints
                 problem = check_invalid_constraint_type(req)
@@ -130,8 +132,8 @@ class Resolver(BaseResolver):
             error = self.factory.get_installation_error(e)
             six.raise_from(error, e)
 
-        print("for fucking test I need to make some error")
-        #print(d)
+        # print("for fucking test I need to make some error")
+        # print(d)
 
         req_set = RequirementSet(check_supported_wheels=check_supported_wheels)
         for candidate in self._result.mapping.values():
