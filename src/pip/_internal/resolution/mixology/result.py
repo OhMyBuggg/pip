@@ -2,8 +2,9 @@ from typing import Any
 from typing import Dict
 from typing import Hashable
 
+from pip._vendor.mixology.result import SolverResult as BaseSolverResult
 
-class SolverResult:
+class SolverResult(BaseSolverResult):
     def __init__(
         self, decisions, attempted_solutions, mapping, graph
     ):  # type: (Dict[Hashable, Any], int) -> None
@@ -11,14 +12,6 @@ class SolverResult:
         self._attempted_solutions = attempted_solutions
         self._mapping = mapping
         self._graph = graph
-
-    @property
-    def decisions(self):  # type: () -> Dict[Hashable, Any]
-        return self._decisions
-
-    @property
-    def attempted_solutions(self):  # type: () -> int
-        return self._attempted_solutions
 
     @property
     def mapping(self):

@@ -1,7 +1,6 @@
 import re
 import sys
 
-
 from pip._internal.resolution.resolvelib.provider import PipProvider
 from pip._internal.resolution.resolvelib.requirements import (
     ExplicitRequirement,
@@ -14,7 +13,6 @@ from pip._internal.resolution.mixology.package import Package
 from pip._vendor.poetry_semver.version import Version
 from pip._vendor.poetry_semver.version_range import VersionRange
 from pip._vendor.poetry_semver import parse_constraint
-from pip._vendor.mixology.package_source import PackageSource as BasePackageSource
 from pip._vendor.mixology.constraint import Constraint
 from pip._vendor.mixology.range import Range
 from pip._vendor.mixology.union import Union
@@ -22,7 +20,7 @@ from pip._vendor.mixology.term import Term
 from pip._vendor.mixology.incompatibility import Incompatibility
 from pip._vendor.mixology.incompatibility_cause import DependencyCause
 
-
+from pip._vendor.mixology.package_source import PackageSource as BasePackageSource
 
 class PackageSource(BasePackageSource):
     def __init__(self, provider, root_requirement):
