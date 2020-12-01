@@ -81,7 +81,8 @@ def pytest_collection_modifyitems(config, items):
         module_root_dir = module_path.split(os.pathsep)[0]
         if (module_root_dir.startswith("functional") or
                 module_root_dir.startswith("integration") or
-                module_root_dir.startswith("lib")):
+                module_root_dir.startswith("lib") or
+                module_root_dir.startswith("mixology")):
             item.add_marker(pytest.mark.integration)
         elif module_root_dir.startswith("unit"):
             item.add_marker(pytest.mark.unit)
