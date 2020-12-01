@@ -14,7 +14,7 @@ from pip._internal.resolution.base import BaseResolver
 from pip._internal.resolution.resolvelib.provider import PipProvider
 
 from pip._internal.resolution.mixology.package_source import PackageSource
-from pip._vendor.mixology.version_solver import VersionSolver
+from pip._internal.resolution.mixology.version_solver import VersionSolver
 from pip._internal.resolution.resolvelib.reporter import (
     PipDebuggingReporter,
     PipReporter,
