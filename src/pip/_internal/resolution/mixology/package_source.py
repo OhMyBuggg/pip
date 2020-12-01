@@ -18,6 +18,10 @@ from pip._vendor.mixology.package_source import PackageSource as BasePackageSour
 from pip._vendor.mixology.constraint import Constraint
 from pip._vendor.mixology.range import Range
 from pip._vendor.mixology.union import Union
+from pip._vendor.mixology.term import Term
+from pip._vendor.mixology.incompatibility import Incompatibility
+from pip._vendor.mixology.incompatibility_cause import DependencyCause
+
 
 
 class PackageSource(BasePackageSource):
@@ -126,6 +130,29 @@ class PackageSource(BasePackageSource):
 
     def convert_dependency(self, dependency): 
         return dependency
+
+    def incompatibilities_for(
+        self, package, version
+    ):  # type: (Hashable, Any) -> List[Incompatibility]
+        """
+        Returns the incompatibilities of a given package and version
+        """
+        dependencies, constraints = self.dependencies_for(package, version)
+        package_constraint = Constraint(package, Range(version, version, True, True))
+        incompatibilities = []
+        for dependency in dependencies:
+            constraint = self.convert_dependency(dependency)
+
+            if not isinstance(constraint, Constraint):
+                constraint = Constraint(package, constraint)
+
+            incompatibility = Incompatibility(
+                [Term(package_constraint, True), Term(constraint, False)],
+                cause=DependencyCause(),
+            )
+            incompatibilities.append(incompatibility)
+
+        return incompatibilities, constraints
 
     def convert_requirement(self, requirement):
         # convert requirement to the type which mixology recongize
