@@ -1,7 +1,6 @@
 import re
 import sys
 
-
 from pip._internal.resolution.resolvelib.provider import PipProvider
 from pip._internal.resolution.resolvelib.requirements import (
     ExplicitRequirement,
@@ -14,11 +13,14 @@ from pip._internal.resolution.mixology.package import Package
 from pip._vendor.poetry_semver.version import Version
 from pip._vendor.poetry_semver.version_range import VersionRange
 from pip._vendor.poetry_semver import parse_constraint
-from pip._vendor.mixology.package_source import PackageSource as BasePackageSource
 from pip._vendor.mixology.constraint import Constraint
 from pip._vendor.mixology.range import Range
 from pip._vendor.mixology.union import Union
+from pip._vendor.mixology.term import Term
+from pip._vendor.mixology.incompatibility import Incompatibility
+from pip._vendor.mixology.incompatibility_cause import DependencyCause
 
+from pip._vendor.mixology.package_source import PackageSource as BasePackageSource
 
 class PackageSource(BasePackageSource):
     def __init__(self, provider, root_requirement):
@@ -126,6 +128,29 @@ class PackageSource(BasePackageSource):
 
     def convert_dependency(self, dependency): 
         return dependency
+
+    def incompatibilities_for(
+        self, package, version
+    ):  # type: (Hashable, Any) -> List[Incompatibility]
+        """
+        Returns the incompatibilities of a given package and version
+        """
+        dependencies, constraints = self.dependencies_for(package, version)
+        package_constraint = Constraint(package, Range(version, version, True, True))
+        incompatibilities = []
+        for dependency in dependencies:
+            constraint = self.convert_dependency(dependency)
+
+            if not isinstance(constraint, Constraint):
+                constraint = Constraint(package, constraint)
+
+            incompatibility = Incompatibility(
+                [Term(package_constraint, True), Term(constraint, False)],
+                cause=DependencyCause(),
+            )
+            incompatibilities.append(incompatibility)
+
+        return incompatibilities, constraints
 
     def convert_requirement(self, requirement):
         # convert requirement to the type which mixology recongize
