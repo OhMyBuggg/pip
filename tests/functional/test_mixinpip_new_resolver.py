@@ -131,3 +131,36 @@ def test_new_resolver_picks_installed_version_extened_second(script):
     )
     assert "Collecting" not in result.stdout, "Should not fetch new version"
     assert_installed(script, simple="0.9.0")
+
+
+@pytest.mark.parametrize(
+    "root_dep",
+    [
+        "base[add] <= 0.2.0",
+        "base[add] > 0.1.0",
+    ],
+)
+def test_new_resolver_installs_extras_extend(tmpdir, script, root_dep):
+    req_file = tmpdir.joinpath("requirements.txt")
+    req_file.write_text(root_dep)
+    
+    create_basic_wheel_for_package(
+        script,
+        "base",
+        "0.2.0",
+        extras={"add": ["dep"]},
+    )
+    create_basic_wheel_for_package(
+        script,
+        "dep",
+        "0.1.0",
+    )
+    
+
+    script.pip(
+        "install",
+        "--no-cache-dir", "--no-index",
+        "--find-links", script.scratch_path,
+        "-r", req_file,
+    )
+    assert_installed(script, base="0.2.0", dep="0.1.0")
