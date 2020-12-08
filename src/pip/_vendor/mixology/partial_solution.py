@@ -83,7 +83,7 @@ class PartialSolution:
 
         self._backtracking = False
         self._decisions[package] = version
-
+        # print("decision",self._decisions)
         self._assign(
             Assignment.decision(
                 package, version, self.decision_level, len(self._assignments)
@@ -110,8 +110,10 @@ class PartialSolution:
         """
         Adds an Assignment to _assignments and _positive or _negative.
         """
+        
         self._assignments.append(assignment)
         self._register(assignment)
+        # print("assign", self._assignments)
 
     def backtrack(self, decision_level):  # type: (int) -> None
         """
@@ -119,13 +121,17 @@ class PartialSolution:
         assignments made after that level.
         """
         self._backtracking = True
-
+        # print("decision", self._decisions)
         packages = set()
-        while self._assignments[-1].decision_level > decision_level:
+        while self._assignments[-1].decision_level >= decision_level:
             removed = self._assignments.pop(-1)
             packages.add(removed.package)
+            # print(removed.package)
+            # print(self._assignments)
             if removed.is_decision():
+                # print(self._decisions[removed.package])
                 del self._decisions[removed.package]
+        # print("decision", self._decisions)
 
         # Re-compute _positive and _negative for the packages that were removed.
         for package in packages:

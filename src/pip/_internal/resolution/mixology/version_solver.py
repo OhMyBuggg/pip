@@ -79,6 +79,7 @@ class VersionSolver(BaseVersionSolver):
         propagated by _propagate(), or None indicating that version solving is
         complete and a solution has been found.
         """
+        print("\nin choose")
         term = self._next_term_to_try()
         if not term:
             return
@@ -96,7 +97,9 @@ class VersionSolver(BaseVersionSolver):
         # print("term.package", term.package, "version", version)
         incompatibilities, constraints = self._source.incompatibilities_for(term.package, version)
         for constraint in constraints:
-            self._solution.derive(constraint, True, None)
+            # self._solution.derive(constraint, True, None)
+            # 5 should be replace by a meaningful object
+            self._solution.derive(constraint, True, 5)
         
         for incompatibility in incompatibilities:
             self._add_incompatibility(incompatibility)
@@ -115,7 +118,6 @@ class VersionSolver(BaseVersionSolver):
 
         if not conflict:
             self._solution.decide(term.package, version)
-            logger.info("selecting {} ({})".format(term.package, str(version)))
             logger.info("selecting {} ({})".format(term.package, str(version)))
 
         return term.package

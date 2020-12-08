@@ -82,7 +82,7 @@ class Resolver(BaseResolver):
         constraints = {}  # type: Dict[str, Constraint]
         user_requested = set()  # type: Set[str]
         requirements = []
-        print("root requirement")
+        # print("root requirement")
         for req in root_reqs:
             print(req.name)
             if req.constraint:

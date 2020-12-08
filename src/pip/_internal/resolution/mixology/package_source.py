@@ -94,12 +94,12 @@ class PackageSource(BasePackageSource):
                     if constraint != 0:
                         constraints.append(constraint)
                 
-                print(candidate)
+                #print(candidate)
                 # print(type(candidate.version))
                 # print(dir(candidate.version))
                 # print(candidate.version.__str__)
                 version = Version.parse(candidate.version.__str__())
-                print(version)
+                # print(version)
                 package = Package(requirement.name)
                 self.package[requirement.name][version] = candidate
 

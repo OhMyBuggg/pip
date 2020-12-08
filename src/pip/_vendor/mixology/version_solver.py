@@ -43,6 +43,7 @@ class VersionSolver:
 
         self._incompatibilities = {}  # type: Dict[Hashable, List[Incompatibility]]
         self._solution = PartialSolution()
+        self.start = time.time()
 
     @property
     def solution(self):  # type: () -> PartialSolution
@@ -100,12 +101,16 @@ class VersionSolver:
         Performs unit propagation on incompatibilities transitively
         related to package to derive new assignments for _solution.
         """
+        # start_start = time.time()
+        # print("\nin propagate")
+
         changed = set()
         changed.add(package)
-
+        # print("init", changed)
         while changed:
+            # print("set", changed)
             package = changed.pop()
-
+            # print(package)
             # Iterate in reverse because conflict resolution tends to produce more
             # general incompatibilities as time goes on. If we look at those first,
             # we can derive stronger assignments sooner and more eagerly find
@@ -121,15 +126,34 @@ class VersionSolver:
                     # It also backjumps to a point in the solution
                     # where that incompatibility will allow us to derive new assignments
                     # that avoid the conflict.
-                    root_cause = self._resolve_conflict(incompatibility)
+                    # root_cause = self._resolve_conflict(incompatibility)
 
                     # Back jumping erases all the assignments we did at the previous
                     # decision level, so we clear [changed] and refill it with the
                     # newly-propagated assignment.
-                    changed.clear()
-                    changed.add(str(self._propagate_incompatibility(root_cause)))
+                    # changed.clear()
+                    # changed.add(str(self._propagate_incompatibility(root_cause)))
+                    # print("conflict")
+                    i = 0
+                    while True :
+                        i+=1
+                        # print(incompatibility)
+                        if i > 10:
+                            raise SolverFailure(incompatibility)
+                        root_cause = self._resolve_conflict(incompatibility)
+                        changed.clear()
+                        temp_result = self._propagate_incompatibility(root_cause)
+                        # print(root_cause)
+                        if temp_result is _conflict:
+                            # print("back conflict")
+                            incompatibility = root_cause
+                        else :
+                            changed.add(str(temp_result))
+                            break
+
                     break
                 elif result is not None:
+                    # print("result", result)
                     changed.add(result)
 
     def _propagate_incompatibility(
@@ -149,7 +173,7 @@ class VersionSolver:
         # _solution, if one exists. If we find more than one, _solution is
         # inconclusive for incompatibility and we can't deduce anything.
         unsatisfied = None
-
+        # print("\nin pro incom")
         for term in incompatibility.terms:
             relation = self._solution.relation(term)
 
@@ -157,11 +181,13 @@ class VersionSolver:
                 # If term is already contradicted by _solution, then
                 # incompatibility is contradicted as well and there's nothing new we
                 # can deduce from it.
+                # print("return none")
                 return
             elif relation == SetRelation.OVERLAPPING:
                 # If more than one term is inconclusive, we can't deduce anything about
                 # incompatibility.
                 if unsatisfied is not None:
+                    # print("return none")
                     return
 
                 # If exactly one term in incompatibility is inconclusive, then it's
@@ -172,14 +198,18 @@ class VersionSolver:
         # If *all* terms in incompatibility are satisfied by _solution, then
         # incompatibility is satisfied and we have a conflict.
         if unsatisfied is None:
+            # print("unsatisfied", unsatisfied)
             return _conflict
 
         logger.info("derived: {}".format(unsatisfied.inverse))
-
+        # print("derived: {}".format(unsatisfied.inverse))
+        # print("  ",incompatibility)
         self._solution.derive(
             unsatisfied.constraint, not unsatisfied.is_positive(), incompatibility
         )
 
+        # print("unsatisfied", unsatisfied)
+        # print("package", unsatisfied.package)
         return unsatisfied.package
 
     def _resolve_conflict(
@@ -226,7 +256,8 @@ class VersionSolver:
 
             for term in incompatibility.terms:
                 satisfier = self._solution.satisfier(term)
-
+                # print("satisfier",satisfier)
+                # print("term", term)
                 if most_recent_satisfier is None:
                     most_recent_term = term
                     most_recent_satisfier = satisfier
@@ -262,10 +293,14 @@ class VersionSolver:
                 previous_satisfier_level < most_recent_satisfier.decision_level
                 or most_recent_satisfier.cause is None
             ):
+                # print("previous_satisfier_level", previous_satisfier_level)
+                # print("before")
+                # for i in self._solution._assignments:
+                    # print(i, i.decision_level)
                 self._solution.backtrack(previous_satisfier_level)
                 if new_incompatibility:
                     self._add_incompatibility(incompatibility)
-
+                # print("after",self._solution._assignments)
                 return incompatibility
 
             # Create a new incompatibility by combining incompatibility with the
@@ -344,6 +379,7 @@ class VersionSolver:
         propagated by _propagate(), or None indicating that version solving is
         complete and a solution has been found.
         """
+        # print("\nin choose")
         term = self._next_term_to_try()
         if not term:
             return
