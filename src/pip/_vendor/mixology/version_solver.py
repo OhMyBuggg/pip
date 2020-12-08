@@ -127,33 +127,33 @@ class VersionSolver:
                     # It also backjumps to a point in the solution
                     # where that incompatibility will allow us to derive new assignments
                     # that avoid the conflict.
-                    # root_cause = self._resolve_conflict(incompatibility)
+                    root_cause = self._resolve_conflict(incompatibility)
 
                     # Back jumping erases all the assignments we did at the previous
                     # decision level, so we clear [changed] and refill it with the
                     # newly-propagated assignment.
-                    # changed.clear()
-                    # changed.add(str(self._propagate_incompatibility(root_cause)))
+                    changed.clear()
+                    changed.add(str(self._propagate_incompatibility(root_cause)))
                     # print("conflict")
                     
-                    while True :
-                        # i+=1
-                        # # print(incompatibility)
-                        # if i > 10:
-                        #     raise SolverFailure(incompatibility)
-                        root_cause = self._resolve_conflict(incompatibility)
-                        changed.clear()
-                        temp_result = self._propagate_incompatibility(root_cause)
-                        # print(root_cause)
-                        if temp_result is _conflict:
-                            # print("back conflict")
-                            incompatibility = root_cause
-                        elif temp_result is None:
-                            print("\nbreak\n")
-                            break
-                        else :
-                            changed.add(str(temp_result))
-                            break
+                    # while True :
+                    #     # i+=1
+                    #     # # print(incompatibility)
+                    #     # if i > 10:
+                    #     #     raise SolverFailure(incompatibility)
+                    #     root_cause = self._resolve_conflict(incompatibility)
+                    #     changed.clear()
+                    #     temp_result = self._propagate_incompatibility(root_cause)
+                    #     # print(root_cause)
+                    #     if temp_result is _conflict:
+                    #         # print("back conflict")
+                    #         incompatibility = root_cause
+                    #     elif temp_result is None:
+                    #         print("\nbreak\n")
+                    #         break
+                    #     else :
+                    #         changed.add(str(temp_result))
+                    #         break
 
                     break
                 elif result is not None:

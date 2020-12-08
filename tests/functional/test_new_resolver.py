@@ -339,11 +339,11 @@ def test_new_resolver_installs_editable(script):
     [
         # Something impossible to satisfy.
         ("<2", False, "0.1.0"),
-        # ("<2", True, "0.2.0"),
+        ("<2", True, "0.2.0"),
 
-        # # Something guaranteed to satisfy.
-        # (">=2", False, "0.2.0"),
-        # (">=2", True, "0.2.0"),
+        # Something guaranteed to satisfy.
+        (">=2", False, "0.2.0"),
+        (">=2", True, "0.2.0"),
     ],
 )
 def test_new_resolver_requires_python(

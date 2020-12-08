@@ -125,7 +125,8 @@ class PartialSolution:
         print("decision", self._decisions)
         print("before", self._assignments)
         packages = set()
-        while self._assignments[-1].decision_level >= decision_level:
+        # while self._assignments[-1].decision_level >= decision_level:
+        while self._assignments[-1].decision_level > decision_level:
             removed = self._assignments.pop(-1)
             packages.add(removed.package)
             # print(removed.package)
