@@ -121,7 +121,9 @@ class PartialSolution:
         assignments made after that level.
         """
         self._backtracking = True
-        # print("decision", self._decisions)
+        print("backtracking")
+        print("decision", self._decisions)
+        print("before", self._assignments)
         packages = set()
         while self._assignments[-1].decision_level >= decision_level:
             removed = self._assignments.pop(-1)
@@ -144,6 +146,8 @@ class PartialSolution:
         for assignment in self._assignments:
             if assignment.package in packages:
                 self._register(assignment)
+        
+        print("after", self._assignments)
 
     def _register(self, assignment):  # type: (Assignment) -> None
         """

@@ -43,7 +43,6 @@ class VersionSolver:
 
         self._incompatibilities = {}  # type: Dict[Hashable, List[Incompatibility]]
         self._solution = PartialSolution()
-        self.start = time.time()
 
     @property
     def solution(self):  # type: () -> PartialSolution
@@ -68,13 +67,13 @@ class VersionSolver:
 
         i = 0
         while not self.is_solved():
-            if not self._run() or i > 10:
+            if not self._run() or i > 20:
                 break
 
             i += 1
-
-        logger.info("Version solving took {:.3f} seconds.\n")
-        logger.info(
+        # logger.info
+        print("Version solving took {:.3f} seconds.\n")
+        print(
             "Tried {} solutions.".format(
                 time.time() - start, self._solution.attempted_solutions
             )
@@ -136,12 +135,12 @@ class VersionSolver:
                     # changed.clear()
                     # changed.add(str(self._propagate_incompatibility(root_cause)))
                     # print("conflict")
-                    i = 0
+                    
                     while True :
-                        i+=1
-                        # print(incompatibility)
-                        if i > 10:
-                            raise SolverFailure(incompatibility)
+                        # i+=1
+                        # # print(incompatibility)
+                        # if i > 10:
+                        #     raise SolverFailure(incompatibility)
                         root_cause = self._resolve_conflict(incompatibility)
                         changed.clear()
                         temp_result = self._propagate_incompatibility(root_cause)
@@ -150,6 +149,7 @@ class VersionSolver:
                             # print("back conflict")
                             incompatibility = root_cause
                         elif temp_result is None:
+                            print("\nbreak\n")
                             break
                         else :
                             changed.add(str(temp_result))
@@ -158,7 +158,7 @@ class VersionSolver:
                     break
                 elif result is not None:
                     # print("result", result)
-                    changed.add(result)
+                    changed.add(str(result))
 
     def _propagate_incompatibility(
         self, incompatibility
@@ -205,7 +205,7 @@ class VersionSolver:
             # print("unsatisfied", unsatisfied)
             return _conflict
 
-        logger.info("derived: {}".format(unsatisfied.inverse))
+        print("derived: {}".format(unsatisfied.inverse))
         # print("derived: {}".format(unsatisfied.inverse))
         # print("  ",incompatibility)
         self._solution.derive(
@@ -229,7 +229,7 @@ class VersionSolver:
 
         .. _conflict resolution: https://github.com/dart-lang/pub/tree/master/doc/solver.md#conflict-resolution
         """
-        logger.info("conflict: {}".format(incompatibility))
+        print("conflict: {}".format(incompatibility))
 
         new_incompatibility = False
         while not incompatibility.is_failure():
@@ -344,15 +344,15 @@ class VersionSolver:
 
             partially = "" if difference is None else " partially"
             bang = "!"
-            logger.info(
+            print(
                 "{} {} is{} satisfied by {}".format(
                     bang, most_recent_term, partially, most_recent_satisfier
                 )
             )
-            logger.info(
+            print(
                 '{} which is caused by "{}"'.format(bang, most_recent_satisfier.cause)
             )
-            logger.info("{} thus: {}".format(bang, incompatibility))
+            print("{} thus: {}".format(bang, incompatibility))
 
         raise SolverFailure(incompatibility)
 
@@ -417,12 +417,12 @@ class VersionSolver:
 
         if not conflict:
             self._solution.decide(term.package, version)
-            logger.info("selecting {} ({})".format(term.package, str(version)))
+            print("selecting {} ({})".format(term.package, str(version)))
 
         return term.package
 
     def _add_incompatibility(self, incompatibility):  # type: (Incompatibility) -> None
-        logger.info("fact: {}".format(incompatibility))
+        print("fact: {}".format(incompatibility))
 
         for term in incompatibility.terms:
             if term.package not in self._incompatibilities:
