@@ -115,6 +115,8 @@ class VersionSolver:
             # general incompatibilities as time goes on. If we look at those first,
             # we can derive stronger assignments sooner and more eagerly find
             # conflicts.
+            # print("size", len(changed))
+            # print("package",package)
             for incompatibility in reversed(self._incompatibilities[package]):
                 result = self._propagate_incompatibility(incompatibility)
 
@@ -147,6 +149,8 @@ class VersionSolver:
                         if temp_result is _conflict:
                             # print("back conflict")
                             incompatibility = root_cause
+                        elif temp_result is None:
+                            break
                         else :
                             changed.add(str(temp_result))
                             break

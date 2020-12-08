@@ -8,10 +8,12 @@ def check_solver_result(source, result=None, error=None, tries=None):
 
     try:
         solution = solver.solve()
+
     except SolverFailure as e:
         if error:
+            # print("error message result\n", str(e))
+            # print("error\n", error)
             assert str(e) == error
-
             if tries is not None:
                 assert solver.solution.attempted_solutions == tries
 
@@ -26,7 +28,8 @@ def check_solver_result(source, result=None, error=None, tries=None):
 
         packages[package] = str(version)
 
+    print("\nexpect", result)
+    print("result", packages)
     assert result == packages
-
     if tries is not None:
         assert solution.attempted_solutions == tries
