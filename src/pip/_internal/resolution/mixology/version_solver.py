@@ -22,14 +22,20 @@ from pip._vendor.mixology.term import Term
 from pip._vendor.resolvelib.structs import DirectedGraph
 
 from pip._vendor.mixology.version_solver import VersionSolver as BaseVersionSolver
-
+from pip._vendor.mixology.version_solver import _conflict
+from .partial_solution import PartialSolution
 
 logger = logging.getLogger(__name__)
 
-_conflict = object()
+# _conflict = object()
 
 
 class VersionSolver(BaseVersionSolver):
+    def __init__(self, source):
+        super(VersionSolver, self).__init__(source)
+        self._solution = PartialSolution()
+        
+    
     def solve(self):  # type: () -> SolverResult
         """
         Finds a set of dependencies that match the root package's constraints,
@@ -46,7 +52,7 @@ class VersionSolver(BaseVersionSolver):
 
         i = 0
         while not self.is_solved():
-            if not self._run() or i > 10:
+            if not self._run() or i > 100:
                 break
             i += 1
 
@@ -70,6 +76,68 @@ class VersionSolver(BaseVersionSolver):
         # return SolverResult(
         #     None, None, mapping, graph
         # )
+
+    def _propagate(self, package):  # type: (Hashable) -> None
+        """
+        Performs unit propagation on incompatibilities transitively
+        related to package to derive new assignments for _solution.
+        """
+        # start_start = time.time()
+        # print("\nin propagate")
+        print(package)
+        changed = set()
+        changed.add(package)
+        # print("init", changed)
+        while changed:
+            # print("set", changed)
+            package = changed.pop()
+            # print(package)
+            # Iterate in reverse because conflict resolution tends to produce more
+            # general incompatibilities as time goes on. If we look at those first,
+            # we can derive stronger assignments sooner and more eagerly find
+            # conflicts.
+            # print("size", len(changed))
+            # print("package",package)
+            print(package)
+            for incompatibility in reversed(self._incompatibilities[package]):
+                result = self._propagate_incompatibility(incompatibility)
+
+                if result is _conflict:
+                    # If the incompatibility is satisfied by the solution, we use
+                    # _resolve_conflict() to determine the root cause of the conflict as a
+                    # new incompatibility.
+                    #
+                    # It also backjumps to a point in the solution
+                    # where that incompatibility will allow us to derive new assignments
+                    # that avoid the conflict.
+                    # root_cause = self._resolve_conflict(incompatibility)
+
+                    # Back jumping erases all the assignments we did at the previous
+                    # decision level, so we clear [changed] and refill it with the
+                    # newly-propagated assignment.
+                    # changed.clear()
+                    # changed.add(str(self._propagate_incompatibility(root_cause)))
+                    # print("conflict")
+                    while True :
+                        root_cause = self._resolve_conflict(incompatibility)
+                        changed.clear()
+                        temp_result = self._propagate_incompatibility(root_cause)
+                        # print(root_cause)
+                        if temp_result is _conflict:
+                            # print("back conflict")
+                            incompatibility = root_cause
+                            
+                        elif temp_result is None:
+                            
+                            break
+                        else :
+                            
+                            changed.add(str(temp_result))
+                            break
+
+                    break
+                elif result is not None:
+                    changed.add(result)
 
     def _choose_package_version(self):  # type: () -> Union[Hashable, None]
         """
