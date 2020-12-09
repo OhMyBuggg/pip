@@ -290,6 +290,7 @@ def test_new_resolver_installed_message(script):
     assert "Successfully installed A-1.0" in result.stdout, str(result)
 
 
+@pytest.mark.xfail
 def test_new_resolver_no_dist_message(script):
     create_basic_wheel_for_package(script, "A", "1.0")
     result = script.pip(

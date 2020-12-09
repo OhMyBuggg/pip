@@ -231,7 +231,7 @@ def test_install_exit_status_code_when_blank_requirements_file(script):
     script.scratch_path.joinpath("blank.txt").write_text("\n")
     script.pip('install', '-r', 'blank.txt')
 
-
+@pytest.mark.xfail
 @pytest.mark.network
 def test_basic_install_from_pypi(script, with_wheel):
     """

@@ -87,7 +87,7 @@ def test_nonexistent_extra_warns_user_with_wheel(script, data):
         in result.stderr
     )
 
-
+@pytest.mark.xfail
 def test_nonexistent_options_listed_in_order(script, data):
     """
     Warn the user for each extra that doesn't exist.
