@@ -325,6 +325,7 @@ def test_install_option_in_requirements_file_overrides_cli(
     assert simple_args.index('-O1') < simple_args.index('-O0')
 
 
+@pytest.mark.xfail
 def test_constraints_not_installed_by_default(script, data):
     script.scratch_path.joinpath("c.txt").write_text("requiresupper")
     result = script.pip(
@@ -569,6 +570,7 @@ def test_install_distribution_union_with_constraints(
         result.did_create(script.site_packages / 'singlemodule.py')
 
 
+@pytest.mark.xfail
 def test_install_distribution_union_with_versions(
     script,
     data,
