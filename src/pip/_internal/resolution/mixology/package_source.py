@@ -1,5 +1,6 @@
 import re
 import sys
+import time
 
 from pip._internal.resolution.resolvelib.provider import PipProvider
 from pip._internal.resolution.resolvelib.requirements import (
@@ -22,6 +23,13 @@ from pip._vendor.mixology.incompatibility_cause import DependencyCause
 
 from pip._vendor.mixology.package_source import PackageSource as BasePackageSource
 
+def _decorator(func):
+        def _decorator(self, a, b):
+            self.time.append(time.time())
+            func(self, a, b)
+            self.time.append(time.time())
+        return _decorator
+
 class PackageSource(BasePackageSource):
     def __init__(self, provider, root_requirement):
         self._root_version = Version.parse("0.0.0")
@@ -29,12 +37,27 @@ class PackageSource(BasePackageSource):
         self.package = {} # store candidate {package(class)):{version(class):candidate}}
         # must be list
         self.root_requirements = root_requirement # list[requirement] must be list
+        self.time = []
 
         super(PackageSource, self).__init__()
 
+
+    
     @property
     def root_version(self):
         return self._root_version
+    
+    # for test speed convenience
+    def versions_for(
+        self, package, constraint=None
+    ):  # type: (Hashable, Any) -> List[Hashable]
+        """
+        Search for the specifications that match the given constraint.
+        """
+        if package == self._root_package:
+            return [self.root_version]
+
+        return self._versions_for(package, constraint)
     
     # we do not need to process the condition of root_package, instead of
     # calling _versions_for directly, version solver call versions_for which is in BasePackageSource
@@ -53,14 +76,17 @@ class PackageSource(BasePackageSource):
         return sorted(versions, reverse=True)
 
     def dependencies_for(self, package, version):  # type: (Hashable(package(class)), Any(version(version))) -> List[dependency]
-        
+        for_version = version
+        for_package = package
         if package == self.root:
             requirements = self.root_requirements
             # print("__root__")
         else:
             # print("not root")
             candidate = self.package[package][version]
+            print(candidate)
             requirements = self.provider.get_dependencies(candidate)
+            print(requirements)
         
         # put candidate in requirement to self.package
         # in this way may take a lot of time in provider.find_match()
@@ -92,7 +118,9 @@ class PackageSource(BasePackageSource):
                     i+=1
                     constraint = self.make_constraints(requirement.name, candidate.version.__str__())
                     if constraint != 0:
-                        constraints.append(constraint)
+                        incompatibility = self.make_incompatibility(for_package, self.convert_requirement(requirement), for_version)
+                        con = {constraint:incompatibility}
+                        constraints.append(con)
                 
                 #print(candidate)
                 # print(type(candidate.version))
@@ -109,6 +137,17 @@ class PackageSource(BasePackageSource):
             dependencies.append(self.convert_requirement(requirement))
 
         return dependencies, constraints
+
+    def make_incompatibility(self, package, constraint, version):
+        package_constraint = Constraint(package, Range(version, version, True, True))
+
+        if not isinstance(constraint, Constraint):
+            constraint = Constraint(package, constraint)
+        incompatibility = Incompatibility(
+            [Term(package_constraint, True), Term(constraint, False)],
+            cause=DependencyCause(),
+        )
+        return incompatibility
     
     def make_constraints(self, name = None, version = None):
         if name != None and version != None:

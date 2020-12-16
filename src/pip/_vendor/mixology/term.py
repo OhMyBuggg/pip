@@ -119,6 +119,7 @@ class Term(object):
         Returns a Term that represents the packages
         allowed by both this term and another
         """
+        print("intersect")
         if self.package != other.package:
             raise ValueError("{} should refer to {}".format(other, self.package))
 
@@ -127,24 +128,29 @@ class Term(object):
                 # foo ^1.0.0 ∩ not foo ^1.5.0 → foo >=1.0.0 <1.5.0
                 positive = self if self.is_positive() else other
                 negative = other if self.is_positive() else self
-
+                # print(1)
                 return self._non_empty_term(
                     positive.constraint.difference(negative.constraint), True
                 )
             elif self.is_positive():
                 # foo ^1.0.0 ∩ foo >=1.5.0 <3.0.0 → foo ^1.5.0
+                # print(2)
                 return self._non_empty_term(
                     self.constraint.intersect(other.constraint), True
                 )
             else:
                 # not foo ^1.0.0 ∩ not foo >=1.5.0 <3.0.0 → not foo >=1.0.0 <3.0.0
+                # print(3)
                 return self._non_empty_term(
                     self.constraint.union(other.constraint), False
                 )
         elif self.is_positive() != other.is_positive():
+            # print(4)
             return self if self.is_positive() else other
         else:
+            # print(5)
             return Term(Constraint(self.package, EmptyRange()))
+        # print(6)
 
     def difference(self, other):  # type: (Term) -> Term
         """

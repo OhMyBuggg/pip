@@ -110,8 +110,9 @@ class PartialSolution:
         """
         Adds an Assignment to _assignments and _positive or _negative.
         """
-        
+        print("assignment",len(self._assignments),assignment)
         self._assignments.append(assignment)
+        print(self._assignments)
         self._register(assignment)
         # print("assign", self._assignments)
 
@@ -185,9 +186,11 @@ class PartialSolution:
         Returns the first Assignment in this solution such that the sublist of
         assignments up to and including that entry collectively satisfies term.
         """
+        # print("term",term)
         assigned_term = None  # type: Term
-
+        # print("print assignment", len(self._assignments), self._assignments)
         for assignment in self._assignments:
+            # print("haha",assignment)
             if assignment.package != term.package:
                 continue
 
@@ -201,11 +204,14 @@ class PartialSolution:
                 assert not term.is_positive()
 
                 return assignment
-
+            # print("assigned_term",assigned_term)
+            # print("assignment",assignment)
             if assigned_term is None:
                 assigned_term = assignment
             else:
+                # print("else")
                 assigned_term = assigned_term.intersect(assignment)
+            # print("assigned_term2",assigned_term)
 
             # As soon as we have enough assignments to satisfy term, return them.
             if assigned_term.satisfies(term):

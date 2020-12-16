@@ -67,7 +67,7 @@ class VersionSolver:
 
         i = 0
         while not self.is_solved():
-            if not self._run() or i > 20:
+            if not self._run() or i > 5:
                 break
 
             i += 1

@@ -34,6 +34,7 @@ class VersionSolver(BaseVersionSolver):
     def __init__(self, source):
         super(VersionSolver, self).__init__(source)
         self._solution = PartialSolution()
+        self._lock = set()
         
     
     def solve(self):  # type: () -> SolverResult
@@ -66,10 +67,10 @@ class VersionSolver(BaseVersionSolver):
         mapping = self._build_mapping()
         graph = self._build_graph(mapping)
 
-        print()
-        print("content", graph._vertices)
-        print("mapping", mapping)
-        print()
+        # print()
+        # print("content", graph._vertices)
+        # print("mapping", mapping)
+        # print()
         return SolverResult(
             self._solution.decisions, self._solution.attempted_solutions, mapping, graph
         )
@@ -84,7 +85,7 @@ class VersionSolver(BaseVersionSolver):
         """
         # start_start = time.time()
         # print("\nin propagate")
-        print(package)
+        # print(package)
         changed = set()
         changed.add(package)
         # print("init", changed)
@@ -98,7 +99,7 @@ class VersionSolver(BaseVersionSolver):
             # conflicts.
             # print("size", len(changed))
             # print("package",package)
-            print(package)
+            # print(package)
             for incompatibility in reversed(self._incompatibilities[package]):
                 result = self._propagate_incompatibility(incompatibility)
 
@@ -128,10 +129,8 @@ class VersionSolver(BaseVersionSolver):
                             incompatibility = root_cause
                             
                         elif temp_result is None:
-                            
                             break
                         else :
-                            
                             changed.add(str(temp_result))
                             break
 
@@ -162,12 +161,16 @@ class VersionSolver(BaseVersionSolver):
 
         version = versions[0]
         conflict = False
-        # print("term.package", term.package, "version", version)
+        print("term.package", term.package, "version", version)
         incompatibilities, constraints = self._source.incompatibilities_for(term.package, version)
-        for constraint in constraints:
-            # self._solution.derive(constraint, True, None)
-            # 5 should be replace by a meaningful object
-            self._solution.derive(constraint, True, 5)
+
+        # for constraint in constraints:
+        #     # self._solution.derive(constraint, True, None)
+        #     # 5 should be replace by a meaningful object
+        #     print("\n eager!!!")
+        #     for constraint, incompatibility in constraint.items():
+        #         self._solution.derive(constraint, True, incompatibility)
+        #         print("derivedd: {}".format(constraint))
         
         for incompatibility in incompatibilities:
             self._add_incompatibility(incompatibility)
@@ -187,6 +190,23 @@ class VersionSolver(BaseVersionSolver):
         if not conflict:
             self._solution.decide(term.package, version)
             logger.info("selecting {} ({})".format(term.package, str(version)))
+
+            for constraint in constraints:
+                # self._solution.derive(constraint, True, None)
+                # 5 should be replace by a meaningful object
+                print("\n eager!!!")
+                for constraint, incompatibility in constraint.items():
+                    record = constraint.package.name + str(constraint.constraint.min)
+                    if record not in self._lock:
+                        self._lock.add(record)
+                        print("constraint", constraint)
+                        print("incompatibility", incompatibility)
+                        self._solution.derive(constraint, True, incompatibility)
+                        print("derivedd: {}".format(constraint))
+                    else:
+                        continue
+
+            
 
         return term.package
 

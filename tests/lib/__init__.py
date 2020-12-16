@@ -238,7 +238,7 @@ class TestPipResult(object):
         self._impl = impl
 
         if verbose:
-            print(self.stdout)
+            # print(self.stdout)
             if self.stderr:
                 print('======= stderr ========')
                 print(self.stderr)
@@ -634,7 +634,7 @@ class PipTestEnvironment(TestFileEnvironment):
             allow_stderr_warning=allow_stderr_warning,
         )
 
-        print(result.stdout)
+        # print(result.stdout)
 
         return TestPipResult(result, verbose=self.verbose)
 
