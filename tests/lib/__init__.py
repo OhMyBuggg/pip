@@ -634,7 +634,8 @@ class PipTestEnvironment(TestFileEnvironment):
             allow_stderr_warning=allow_stderr_warning,
         )
 
-        return TestPipResult(result, verbose=self.verbose)
+        return TestPipResult(result, verbose=True)
+        # return TestPipResult(result, verbose=self.verbose)
 
     def pip(self, *args, **kwargs):
         __tracebackhide__ = True

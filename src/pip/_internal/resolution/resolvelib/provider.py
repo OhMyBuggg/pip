@@ -1,3 +1,5 @@
+import time
+
 from pip._vendor.resolvelib.providers import AbstractProvider
 
 from pip._internal.utils.typing import MYPY_CHECK_RUNNING
@@ -45,6 +47,8 @@ class PipProvider(AbstractProvider):
         self._upgrade_strategy = upgrade_strategy
         self._user_requested = user_requested
 
+        self.time = []
+
     def identify(self, dependency):
         # type: (Union[Requirement, Candidate]) -> str
         return dependency.name
@@ -56,11 +60,18 @@ class PipProvider(AbstractProvider):
         information  # type: Sequence[Tuple[Requirement, Candidate]]
     ):
         # type: (...) -> Any
+        self.time.append(time.time())
+
         transitive = all(parent is not None for _, parent in information)
+
+        self.time.append(time.time())
+
         return (transitive, bool(candidates))
 
     def find_matches(self, requirements):
         # type: (Sequence[Requirement]) -> Iterable[Candidate]
+        self.time.append(time.time())
+
         if not requirements:
             return []
         name = requirements[0].name
@@ -83,21 +94,30 @@ class PipProvider(AbstractProvider):
                 return (name in self._user_requested)
             return False
 
-        return self._factory.find_candidates(
+        for_record = self._factory.find_candidates(
             requirements,
             constraint=self._constraints.get(name, Constraint.empty()),
             prefers_installed=(not _eligible_for_upgrade(name)),
-        )
+            )
+
+        self.time.append(time.time())
+        return for_record
 
     def is_satisfied_by(self, requirement, candidate):
         # type: (Requirement, Candidate) -> bool
-        return requirement.is_satisfied_by(candidate)
+        self.time.append(time.time())
+        for_record = requirement.is_satisfied_by(candidate)
+        self.time.append(time.time())
+        return for_record
 
     def get_dependencies(self, candidate):
         # type: (Candidate) -> Sequence[Requirement]
+        self.time.append(time.time())
         with_requires = not self._ignore_dependencies
-        return [
-            r
+        for_record = [
+            r 
             for r in candidate.iter_dependencies(with_requires)
             if r is not None
-        ]
+            ]
+        self.time.append(time.time())
+        return for_record

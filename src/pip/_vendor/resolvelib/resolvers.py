@@ -1,4 +1,5 @@
 import collections
+import time
 
 from .compat import collections_abc
 from .providers import AbstractResolver
@@ -285,6 +286,7 @@ class Resolution(object):
         return False
 
     def resolve(self, requirements, max_rounds):
+
         if self._states:
             raise RuntimeError("already resolved")
 
@@ -423,6 +425,18 @@ class Resolver(AbstractResolver):
             dependency, but you can try to resolve this by increasing the
             `max_rounds` argument.
         """
+        start = time.time()
+        
         resolution = Resolution(self.provider, self.reporter)
         state = resolution.resolve(requirements, max_rounds=max_rounds)
+
+        end = time.time()
+        timelist = resolution._p.time
+        cost = end - start
+        for i in range(0,len(timelist)-1):
+            cost = cost - timelist[i+1] + timelist[i]
+            i += 2
+        print("Version solving took {} seconds".format(
+                cost
+            ))
         return _build_result(state)

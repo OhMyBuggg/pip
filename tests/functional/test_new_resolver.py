@@ -1046,6 +1046,7 @@ def test_new_resolver_prefers_installed_in_upgrade_if_latest(script):
 
 
 @pytest.mark.parametrize("N", [2, 10, 20])
+# @pytest.mark.parametrize("N", [2])
 def test_new_resolver_presents_messages_when_backtracking_a_lot(script, N):
     # Generate a set of wheels that will definitely cause backtracking.
     for index in range(1, N+1):
