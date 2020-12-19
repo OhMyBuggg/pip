@@ -23,9 +23,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest tox
         pip install -r tools/requirements/tests.txt
-    - name: Test with tox
+    - name: Test backtracking a lot
       run: |
         tox -e py38 -- tests/functional/test_new_resolver.py::test_new_resolver_presents_messages_when_backtracking_a_lot
+    - name: Test example
+      run: |
+        tox -e py38 -- tests/functional/mytest.py
     # - name: Test with pytest
     #   run: |
     #     pytest

@@ -156,6 +156,8 @@ class Resolution(object):
         self._p = provider
         self._r = reporter
         self._states = []
+        self._count = 1
+        self._package_insight = 0
 
     @property
     def state(self):
@@ -221,9 +223,11 @@ class Resolution(object):
     def _attempt_to_pin_criterion(self, name, criterion):
         causes = []
         for candidate in criterion.candidates:
+            self._package_insight += 1
             try:
                 criteria = self._get_criteria_to_update(candidate)
             except RequirementsConflicted as e:
+                self._count += 1
                 causes.append(e.criterion)
                 continue
 
@@ -433,10 +437,13 @@ class Resolver(AbstractResolver):
         end = time.time()
         timelist = resolution._p.time
         cost = end - start
+        print("Version solving took {} seconds include provider".format(cost))
         for i in range(0,len(timelist)-1):
             cost = cost - timelist[i+1] + timelist[i]
             i += 2
         print("Version solving took {} seconds".format(
                 cost
             ))
+        print("Attempted times", resolution._count)
+        print("Package insight", resolution._package_insight)
         return _build_result(state)
