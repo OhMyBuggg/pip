@@ -110,9 +110,9 @@ class PartialSolution:
         """
         Adds an Assignment to _assignments and _positive or _negative.
         """
-        print("assignment",len(self._assignments),assignment)
+        # print("assignment",len(self._assignments),assignment)
         self._assignments.append(assignment)
-        print(self._assignments)
+        # print(self._assignments)
         self._register(assignment)
         # print("assign", self._assignments)
 
@@ -122,9 +122,9 @@ class PartialSolution:
         assignments made after that level.
         """
         self._backtracking = True
-        print("backtracking")
-        print("decision", self._decisions)
-        print("before", self._assignments)
+        # print("backtracking")
+        # print("decision", self._decisions)
+        # print("before", self._assignments)
         packages = set()
         # while self._assignments[-1].decision_level >= decision_level:
         while self._assignments[-1].decision_level > decision_level:
@@ -149,7 +149,7 @@ class PartialSolution:
             if assignment.package in packages:
                 self._register(assignment)
         
-        print("after", self._assignments)
+        # print("after", self._assignments)
 
     def _register(self, assignment):  # type: (Assignment) -> None
         """

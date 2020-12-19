@@ -84,9 +84,9 @@ class PackageSource(BasePackageSource):
         else:
             # print("not root")
             candidate = self.package[package][version]
-            print(candidate)
+            # print(candidate)
             requirements = self.provider.get_dependencies(candidate)
-            print(requirements)
+            # print(requirements)
         
         # put candidate in requirement to self.package
         # in this way may take a lot of time in provider.find_match()
@@ -198,7 +198,7 @@ class PackageSource(BasePackageSource):
         if isinstance(requirement, ExplicitRequirement):
             # may occur problem because of unclean specifier
             #for_constraint = re.split(r'(===|==|~=|!=|>=|>|<=|<)', requirement.candidate.version)
-            print("ExplicitRequirement")
+            # print("ExplicitRequirement")
             # print(type(requirement.candidate.version))
             # print(requirement.candidate.version)
             return Constraint(
@@ -209,7 +209,7 @@ class PackageSource(BasePackageSource):
         
         elif isinstance(requirement, SpecifierRequirement):
             
-            print("SpecifierRequirement")
+            # print("SpecifierRequirement")
             specs = requirement._ireq.req.specifier
             # print("specifier", specs)
             # print("type", type(specs))
@@ -238,7 +238,7 @@ class PackageSource(BasePackageSource):
                 constraint = (Constraint(Package(requirement.name), Union(*ranges)))
         
         elif isinstance(requirement, RequiresPythonRequirement):
-            print("RequiresPythonRequirement")
+            # print("RequiresPythonRequirement")
 
             specs = requirement.specifier
 
@@ -263,7 +263,8 @@ class PackageSource(BasePackageSource):
                 constraint = (Constraint(Package(requirement.name), Union(*ranges)))
             
         else :
-            print("some error happen")
+            pass
+            # print("some error happen")
 
         return constraint
     # Version.parse will return list of Range
@@ -325,7 +326,8 @@ class PackageSource(BasePackageSource):
             return [Range(min=None, max=version, include_min=False, include_max=False)]
         
         else :
-            print("error")
+            # print("error")
+            pass
         
         return 0
 

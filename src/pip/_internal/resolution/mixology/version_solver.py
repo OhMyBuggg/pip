@@ -57,20 +57,28 @@ class VersionSolver(BaseVersionSolver):
                 break
             i += 1
 
-        logger.info("Version solving took {:.3f} seconds.\n")
-        logger.info(
-            "Tried {} solutions.".format(
-                time.time() - start, self._solution.attempted_solutions
-            )
-        )
+        # logger.info("Version solving took {:.3f} seconds".format(
+        #         time.time() - start
+        #     ))
+        # logger.info(
+        #     "Tried {} solutions.".format(
+        #         self._solution.attempted_solutions
+        #     )
+        # )
 
+        end = time.time()
+        cost = end - start
+        for i in range(0,len(self.timelist)-1):
+            cost = cost - self.timelist[i+1] + self.timelist[i]
+            i += 2
+        print("Version solving took {} seconds".format(
+                cost
+            ))
+        
         mapping = self._build_mapping()
         graph = self._build_graph(mapping)
 
-        # print()
-        # print("content", graph._vertices)
-        # print("mapping", mapping)
-        # print()
+        
         return SolverResult(
             self._solution.decisions, self._solution.attempted_solutions, mapping, graph
         )
@@ -146,12 +154,13 @@ class VersionSolver(BaseVersionSolver):
         propagated by _propagate(), or None indicating that version solving is
         complete and a solution has been found.
         """
-        print("\nin choose")
+        # print("\nin choose")
         term = self._next_term_to_try()
         if not term:
             return
-
+        self.timelist.append(time.time())
         versions = self._source.versions_for(term.package, term.constraint.constraint)
+        self.timelist.append(time.time())
         if not versions:
             # If there are no versions that satisfy the constraint,
             # add an incompatibility that indicates that.
@@ -161,8 +170,10 @@ class VersionSolver(BaseVersionSolver):
 
         version = versions[0]
         conflict = False
-        print("term.package", term.package, "version", version)
+        # print("term.package", term.package, "version", version)
+        self.timelist.append(time.time())
         incompatibilities, constraints = self._source.incompatibilities_for(term.package, version)
+        self.timelist.append(time.time())
 
         # for constraint in constraints:
         #     # self._solution.derive(constraint, True, None)
@@ -189,20 +200,20 @@ class VersionSolver(BaseVersionSolver):
 
         if not conflict:
             self._solution.decide(term.package, version)
-            logger.info("selecting {} ({})".format(term.package, str(version)))
+            # logger.info("selecting {} ({})".format(term.package, str(version)))
 
             for constraint in constraints:
                 # self._solution.derive(constraint, True, None)
                 # 5 should be replace by a meaningful object
-                print("\n eager!!!")
+                # print("\n eager!!!")
                 for constraint, incompatibility in constraint.items():
                     record = constraint.package.name + str(constraint.constraint.min)
                     if record not in self._lock:
                         self._lock.add(record)
-                        print("constraint", constraint)
-                        print("incompatibility", incompatibility)
+                        # print("constraint", constraint)
+                        # print("incompatibility", incompatibility)
                         self._solution.derive(constraint, True, incompatibility)
-                        print("derivedd: {}".format(constraint))
+                        # print("derivedd: {}".format(constraint))
                     else:
                         continue
 
@@ -211,8 +222,8 @@ class VersionSolver(BaseVersionSolver):
         return term.package
 
     def _build_mapping(self):
-        logger.info("build mapping")
-        logger.info(self._solution.decisions)
+        # logger.info("build mapping")
+        # logger.info(self._solution.decisions)
         mapping = collections.OrderedDict() #str : candidate
         for package, version in self._solution.decisions.items():
             # print(package)

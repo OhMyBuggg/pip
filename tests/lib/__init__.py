@@ -238,7 +238,7 @@ class TestPipResult(object):
         self._impl = impl
 
         if verbose:
-            # print(self.stdout)
+            print(self.stdout)
             if self.stderr:
                 print('======= stderr ========')
                 print(self.stderr)
@@ -635,8 +635,8 @@ class PipTestEnvironment(TestFileEnvironment):
         )
 
         # print(result.stdout)
-
-        return TestPipResult(result, verbose=self.verbose)
+        return TestPipResult(result, verbose=True)
+        # return TestPipResult(result, verbose=self.verbose)
 
     def pip(self, *args, **kwargs):
         __tracebackhide__ = True

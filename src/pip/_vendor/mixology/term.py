@@ -119,7 +119,7 @@ class Term(object):
         Returns a Term that represents the packages
         allowed by both this term and another
         """
-        print("intersect")
+        # print("intersect")
         if self.package != other.package:
             raise ValueError("{} should refer to {}".format(other, self.package))
 

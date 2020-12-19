@@ -20,9 +20,9 @@ class PartialSolution(BaseSolution):
         assignments made after that level.
         """
         self._backtracking = True
-        print("backtracking")
-        print("decision", self._decisions)
-        print("before", self._assignments)
+        # print("backtracking")
+        # print("decision", self._decisions)
+        # print("before", self._assignments)
         packages = set()
         while self._assignments[-1].decision_level >= decision_level:
             removed = self._assignments.pop(-1)
@@ -46,4 +46,4 @@ class PartialSolution(BaseSolution):
             if assignment.package in packages:
                 self._register(assignment)
         
-        print("after", self._assignments)
+        # print("after", self._assignments)

@@ -44,6 +44,8 @@ class VersionSolver:
         self._incompatibilities = {}  # type: Dict[Hashable, List[Incompatibility]]
         self._solution = PartialSolution()
 
+        self.timelist = []
+
     @property
     def solution(self):  # type: () -> PartialSolution
         return self._solution
@@ -205,7 +207,7 @@ class VersionSolver:
             # print("unsatisfied", unsatisfied)
             return _conflict
 
-        print("derived: {}".format(unsatisfied.inverse))
+        # print("derived: {}".format(unsatisfied.inverse))
         # print("derived: {}".format(unsatisfied.inverse))
         # print("  ",incompatibility)
         self._solution.derive(
@@ -229,7 +231,7 @@ class VersionSolver:
 
         .. _conflict resolution: https://github.com/dart-lang/pub/tree/master/doc/solver.md#conflict-resolution
         """
-        print("conflict: {}".format(incompatibility))
+        # print("conflict: {}".format(incompatibility))
 
         new_incompatibility = False
         while not incompatibility.is_failure():
@@ -342,17 +344,17 @@ class VersionSolver:
             )
             new_incompatibility = True
 
-            partially = "" if difference is None else " partially"
-            bang = "!"
-            print(
-                "{} {} is{} satisfied by {}".format(
-                    bang, most_recent_term, partially, most_recent_satisfier
-                )
-            )
-            print(
-                '{} which is caused by "{}"'.format(bang, most_recent_satisfier.cause)
-            )
-            print("{} thus: {}".format(bang, incompatibility))
+            # partially = "" if difference is None else " partially"
+            # bang = "!"
+            # print(
+            #     "{} {} is{} satisfied by {}".format(
+            #         bang, most_recent_term, partially, most_recent_satisfier
+            #     )
+            # )
+            # print(
+            #     '{} which is caused by "{}"'.format(bang, most_recent_satisfier.cause)
+            # )
+            # print("{} thus: {}".format(bang, incompatibility))
 
         raise SolverFailure(incompatibility)
 
@@ -371,7 +373,9 @@ class VersionSolver:
         if len(unsatisfied) == 1:
             term = unsatisfied[0]
         else:
+            self.timelist.append(time.time())
             term = min(*unsatisfied, key=_get_min)
+            self.timelist.append(time.time())
 
         return term
 
@@ -387,8 +391,9 @@ class VersionSolver:
         term = self._next_term_to_try()
         if not term:
             return
-
+        
         versions = self._source.versions_for(term.package, term.constraint.constraint)
+
         if not versions:
             # If there are no versions that satisfy the constraint,
             # add an incompatibility that indicates that.
@@ -417,12 +422,12 @@ class VersionSolver:
 
         if not conflict:
             self._solution.decide(term.package, version)
-            print("selecting {} ({})".format(term.package, str(version)))
+            # print("selecting {} ({})".format(term.package, str(version)))
 
         return term.package
 
     def _add_incompatibility(self, incompatibility):  # type: (Incompatibility) -> None
-        print("fact: {}".format(incompatibility))
+        # print("fact: {}".format(incompatibility))
 
         for term in incompatibility.terms:
             if term.package not in self._incompatibilities:
