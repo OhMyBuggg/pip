@@ -20,6 +20,7 @@ from pip._internal.resolution.mixology.result import SolverResult
 from pip._vendor.mixology.term import Term
 
 from pip._vendor.resolvelib.structs import DirectedGraph
+from pip._vendor.mixology.assignment import Assignment
 
 from pip._vendor.mixology.version_solver import VersionSolver as BaseVersionSolver
 from pip._vendor.mixology.version_solver import _conflict
@@ -35,6 +36,9 @@ class VersionSolver(BaseVersionSolver):
         super(VersionSolver, self).__init__(source)
         self._solution = PartialSolution()
         self._lock = set()
+        self._package_insight = 0
+        self._package_meta = set()
+        self._count = 1
         
     
     def solve(self):  # type: () -> SolverResult
@@ -68,12 +72,16 @@ class VersionSolver(BaseVersionSolver):
 
         end = time.time()
         cost = end - start
+        print("Version solving took {} seconds include provider".format(cost))
         for i in range(0,len(self.timelist)-1):
             cost = cost - self.timelist[i+1] + self.timelist[i]
             i += 2
         print("Version solving took {} seconds".format(
                 cost
             ))
+        print("Attempt solution", self._count)
+        print("Package insight", self._package_insight)
+        print("set",self._package_meta)
         
         mapping = self._build_mapping()
         graph = self._build_graph(mapping)
@@ -127,6 +135,7 @@ class VersionSolver(BaseVersionSolver):
                     # changed.clear()
                     # changed.add(str(self._propagate_incompatibility(root_cause)))
                     # print("conflict")
+
                     while True :
                         root_cause = self._resolve_conflict(incompatibility)
                         changed.clear()
@@ -143,6 +152,7 @@ class VersionSolver(BaseVersionSolver):
                             break
 
                     break
+
                 elif result is not None:
                     changed.add(result)
 
@@ -156,6 +166,7 @@ class VersionSolver(BaseVersionSolver):
         """
         # print("\nin choose")
         term = self._next_term_to_try()
+        
         if not term:
             return
         self.timelist.append(time.time())
@@ -172,6 +183,10 @@ class VersionSolver(BaseVersionSolver):
         conflict = False
         # print("term.package", term.package, "version", version)
         self.timelist.append(time.time())
+        if term.package.name + version.__str__() not in self._package_meta:
+            self._package_insight += 1
+            self._package_meta.add( term.package.name + version.__str__() )
+        
         incompatibilities, constraints = self._source.incompatibilities_for(term.package, version)
         self.timelist.append(time.time())
 
@@ -200,7 +215,7 @@ class VersionSolver(BaseVersionSolver):
 
         if not conflict:
             self._solution.decide(term.package, version)
-            # logger.info("selecting {} ({})".format(term.package, str(version)))
+            # print("selecting {} ({})".format(term.package, str(version)))
 
             for constraint in constraints:
                 # self._solution.derive(constraint, True, None)
@@ -212,10 +227,21 @@ class VersionSolver(BaseVersionSolver):
                         self._lock.add(record)
                         # print("constraint", constraint)
                         # print("incompatibility", incompatibility)
-                        self._solution.derive(constraint, True, incompatibility)
+                        # self._solution.derive(constraint, True, incompatibility)
+                        self._solution._assign(
+                            Assignment.derivation(
+                                constraint,
+                                True,
+                                incompatibility,
+                                self._solution.decision_level + 1,
+                                len(self._solution._assignments),
+                                )
+                            )
                         # print("derivedd: {}".format(constraint))
                     else:
                         continue
+        else:
+            self._count += 1
 
             
 
