@@ -26,6 +26,6 @@ jobs:
     - name: Test with tox
       run: |
         tox -e py38 -- tests/functional/test_new_resolver.py::test_new_resolver_presents_messages_when_backtracking_a_lot
-    - name: Test with pytest
-      run: |
-        pytest
+    # - name: Test with pytest
+    #   run: |
+    #     pytest
