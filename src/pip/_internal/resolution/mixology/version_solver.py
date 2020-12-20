@@ -39,7 +39,7 @@ class VersionSolver(BaseVersionSolver):
         self._package_insight = 0
         self._package_meta = set()
         self._count = 1
-        
+        self._skip = 0
     
     def solve(self):  # type: () -> SolverResult
         """
@@ -93,7 +93,18 @@ class VersionSolver(BaseVersionSolver):
         # return SolverResult(
         #     None, None, mapping, graph
         # )
+    # def _run(self):  # type: () -> bool
+    #     if self.is_solved():
+    #         return False
+    #     if self._skip == 0:
+    #         next_package = self._choose_package_version()
+    #     self._propagate(next_package)
 
+    #     if self.is_solved():
+    #         return False
+
+    #     return True
+    
     def _propagate(self, package):  # type: (Hashable) -> None
         """
         Performs unit propagation on incompatibilities transitively
@@ -150,7 +161,6 @@ class VersionSolver(BaseVersionSolver):
                         else :
                             changed.add(str(temp_result))
                             break
-
                     break
 
                 elif result is not None:
@@ -165,6 +175,7 @@ class VersionSolver(BaseVersionSolver):
         complete and a solution has been found.
         """
         # print("\nin choose")
+        self._skip = 0
         term = self._next_term_to_try()
         
         if not term:
@@ -218,25 +229,23 @@ class VersionSolver(BaseVersionSolver):
             # print("selecting {} ({})".format(term.package, str(version)))
 
             for constraint in constraints:
-                # self._solution.derive(constraint, True, None)
-                # 5 should be replace by a meaningful object
-                # print("\n eager!!!")
+                self._skip = 1
                 for constraint, incompatibility in constraint.items():
                     record = constraint.package.name + str(constraint.constraint.min)
                     if record not in self._lock:
                         self._lock.add(record)
                         # print("constraint", constraint)
                         # print("incompatibility", incompatibility)
-                        # self._solution.derive(constraint, True, incompatibility)
-                        self._solution._assign(
-                            Assignment.derivation(
-                                constraint,
-                                True,
-                                incompatibility,
-                                self._solution.decision_level + 1,
-                                len(self._solution._assignments),
-                                )
-                            )
+                        self._solution.derive(constraint, True, incompatibility)
+                        # self._solution._assign(
+                        #     Assignment.derivation(
+                        #         constraint,
+                        #         True,
+                        #         incompatibility,
+                        #         self._solution.decision_level + 1,
+                        #         len(self._solution._assignments),
+                        #         )
+                        #     )
                         # print("derivedd: {}".format(constraint))
                     else:
                         continue
