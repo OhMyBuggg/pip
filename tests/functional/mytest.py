@@ -41,10 +41,15 @@ def test_silde_example(script):
 
     # dropdown
     for index in range(0,4):
-        depends=["icons == 2.0.0"]
+        depends=["poyu >= 3.0.0"]
         version = "2.{index}.0".format(index=index)
         create_basic_wheel_for_package(script, "dropdown", version, depends=depends)
     create_basic_wheel_for_package(script, "dropdown", "1.8.0")
+
+    for index in range(0,4):
+        depends=["icons == 2.0.0"]
+        version = "3.{index}.0".format(index=index)
+        create_basic_wheel_for_package(script, "poyu", version, depends=depends)
 
     #icons
     create_basic_wheel_for_package(script, "icons", "2.0.0")
