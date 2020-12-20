@@ -274,7 +274,9 @@ class PackageSource(BasePackageSource):
         op_and_version = re.split(r'(===|==|~=|!=|>=|>|<=|<|\*)', spec) #list of str
         if op_and_version[1] == '===':
             # I surrender. I think it can't be transformed to range
-            return [Range()]
+            min = Version.parse(op_and_version[2])
+            max = Version.parse(op_and_version[2])
+            return [ Range(min, max, True, True) ]
         
         elif op_and_version[1] == '==' and len(op_and_version) != 4:
             # print("in == operator")
